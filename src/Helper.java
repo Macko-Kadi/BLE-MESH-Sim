@@ -13,6 +13,7 @@ import java.util.TimeZone;
 
 
 /**
+ * master-MS
  * Set of handy functions
  */
 public final class Helper {
