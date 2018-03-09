@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-	//comment added via website - will it syunchronize with my local repository ?
 
 class Event {
 	float startTime;
