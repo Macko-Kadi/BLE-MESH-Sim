@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
-//
 /**
+ * MS-eclipse
  * <pre>
  * Main class of the simulator. Everything starts and ends here.
  * You create an environment here 
