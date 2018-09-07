@@ -18,8 +18,8 @@ import java.util.TimeZone;
 public final class Helper {
 	//you may set what you want to debugg
 	public static boolean DEBUG_RCV=false;  
-	public static boolean DEBUG_EVENTS=true;  
-	public static boolean DEBUG_CACHE=false;
+	public static boolean DEBUG_EVENTS=false;  
+	public static boolean DEBUG_CACHE=true;
 	public static boolean DEBUG_NOISE=false;
 	public static boolean DEBUG_TRANS=false;
 	public static boolean DEBUG_STATE=false;
@@ -64,7 +64,7 @@ public final class Helper {
 	 */
 	public static double round(Number value, int decimalPlaces){
 		double result=value.doubleValue()*Math.pow(10, decimalPlaces);
-		int tempValue=(int)Math.round(result);
+		long tempValue=(long)Math.round(result);
 		return tempValue/Math.pow(10, decimalPlaces);	
 	}	
 //	/**

@@ -6,6 +6,7 @@ import java.util.Collections;
 class Event {
 	float startTime;
 	/**
+	
 	 * <pre>
 	 * Type of the event. For now there is a number of defined events:
 	 * PACKET_GENERATION
@@ -46,7 +47,7 @@ class Event {
 			case "END_OF_SYNCED_RECEPTION":
 				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: END_OF_SYNCED_RECEPTION,\t ID: "+metadata);
 				nodeID=Byte.valueOf(metadata);
-				newEvents.add(Engine.LIST_OF_NODES.get(nodeID).endOfSyncedReception(this.getTransmission()));
+				newEvents.add(Engine.LIST_OF_NODES.get(nodeID).endOfSyncedReception(this.getTransmission(), Engine.LIST_OF_NODES.get(nodeID)));
 				break;
 			case "TRY_TO_START_TRANSMISSION":
 				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: TRY_TO_START_TRANSMISSION, ID: "+metadata);

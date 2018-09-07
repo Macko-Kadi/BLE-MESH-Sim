@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <pre>
@@ -40,7 +42,7 @@ class Node {
 	 * TODO: confirm the value
 	 * </pre>
 	 */
-	private static final float MAX_TRANSMISSION_POWER=10;	
+	public static final float MAX_TRANSMISSION_POWER=10;	
 	/**
 	 * If noise power is greater than the level - phyState=3 (CCA_BUSY) - a node can't start transmission
 	 */
@@ -212,6 +214,16 @@ class Node {
 	 * Source that generates packets
 	 */
 	private PacketsSource packetsSource;
+	
+	public static int packetCount=0;
+	public static int packetReceivedCount=0;
+	public static int retransmit=0;
+	public static ArrayList<String> duplicateList = new ArrayList<String>();
+	public static int duplicateCounter;
+	public static int collisionCounter;
+	public static int noCollisionCounter;
+	public static Map<String, Float> timeOfPacketGeneration = new HashMap<String, Float>();
+	public static Map<String,Float> timeOfPacketReception=new HashMap<String, Float>();
 
 //	I've decided to make it very simple so I don't use the BackoffCounter object at the moment
 //	/**
@@ -254,6 +266,7 @@ class Node {
 		}
 		else{ //if can't start transmission - start backoff again
 			return startBackoffProcedure();
+			
 		}
 	}
 	/**
@@ -268,6 +281,7 @@ class Node {
 		currentTransmission=null;
 		if (isQueueEmpty()) return null;
 		else{
+			retransmit++;
 			return startBackoffProcedure();
 		}
 	}
@@ -280,14 +294,18 @@ class Node {
 	 * ArrayList of Events is used instead of EventList - I don't need to sort events in this list - they need to be sorted anyway later.
 	 * </pre>
 	 */
+	static ArrayList<Packet> packetList = new ArrayList<Packet>();
 	ArrayList<Event> generatePacket(){
 		ArrayList<Event> list = new ArrayList<Event>();
 		Packet p=packetsSource.createPacket(this);
-		if(Helper.DEBUG_TRANS) System.out.println("Generated packet ID: " +p.header.packetID);		
+		if(Helper.DEBUG_TRANS) System.out.println("Generated packet ID: " +p.header.packetID);	
+		packetList.add(p);
 		list.add(new Event (packetsSource.timeOfNextGen,"PACKET_GENERATION", Byte.toString(ID)));		
 		addPacketToCache(p);							//all generated packets need to be cached 
 		list.add(addPacketToQueue(p));					//add packet to the queue (it may trigger event)
 		list.removeAll(Collections.singleton(null)); 	//remove all nulls from the list
+		packetCount++;
+		timeOfPacketGeneration.put(p.header.packetID,Engine.simTime);
 		return list;
 	}
 	/**
@@ -347,8 +365,10 @@ class Node {
 	 * 
 	 * @param p 
 	 */
-	private Event processPacket(Packet p){	
+	private Event processPacket(Packet p, Node n){	
 		if(!cache.isThePacketInCache(p)){  					//if it is the first time when the node received the packet 
+			p.header.TTL = (byte) (p.header.TTL-1);
+			System.out.println("TTL: "+ p.header.TTL);
 			addPacketToCache(p);								//add the packet to the cache, and
 			if (isNodeDestination(p)){							//1) if the node is packet destination
 				performPacketActions(p); 							//perform actions defined in packet, 
@@ -356,11 +376,20 @@ class Node {
 			}
 			else if (doesNodeBelongToDestinationGroup(p)){		//2) if the node belongs to a destination group 
 				performPacketActions(p);							//perform actions defined in packet 
-				return addPacketToQueue(p);							//and then send* it to other nodes - the packet must reach all the group members. *(I meant, add it to the queue, of course)			
+				if (Provisioner.isNodeRelay(n)) {
+				return addPacketToQueue(p);	}						//and then send* it to other nodes - the packet must reach all the group members. *(I meant, add it to the queue, of course)			
 			}
-			else return addPacketToQueue(p);					//3) if not 1) or 2) -> send* it to other nodes. *(I meant, add it to the queue, of course)
+			else 
+				if (Provisioner.isNodeRelay(n)) {
+					return addPacketToQueue(p);}					//3) if not 1) or 2) -> send* it to other nodes. *(I meant, add it to the queue, of course)
 		}
-		else if(Helper.DEBUG_CACHE) System.out.println("The packet " + p.header.packetID+ " was cached already !");
+		else if(Helper.DEBUG_CACHE) 
+			{System.out.println("The packet " + p.header.packetID+ " was cached already !");
+			if (isNodeDestination(p)){
+				duplicateList.add(p.header.packetID);
+				duplicateCounter++;
+			}
+			}
 		return null; 										//if the packet was cached already - do nothing (
 	}	
 	/* <pre>
@@ -398,15 +427,17 @@ class Node {
 	 * Details in the source code comments.
 	 *</pre>
 	 */
-	Event endOfSyncedReception(Transmission t){
+	Event endOfSyncedReception(Transmission t, Node n){
 		phyState="IDLE"; 													//phyState changes from SYNC to IDLE
 		if(syncedReception.isTheReceptionSuccessfull()){					//if the transmission is successfully received
-			Event e=processPacket(syncedReception.transmission.packet);			//process the packet obtained from the received transmission (it generates an event)
+			Event e=processPacket(syncedReception.transmission.packet, n);			//process the packet obtained from the received transmission (it generates an event)
 			if (Helper.DEBUG_RCV) System.out.println("Node " + ID+" SUCCESSFULL RECEPTION ! Process Packet");//													|
+			noCollisionCounter++;
 			syncedReception=null;												//there is no synced reception at the moment									|									
 			return e;															//return the event <-------------------------------------------------------------
 		}
 		else {																//if the transmission is NOT successfully received
+			collisionCounter++;
 			syncedReception=null;												//there is no synced reception at the moment
 			return null;														//do nothing
 		}			
@@ -417,6 +448,10 @@ class Node {
 	 */
 	private void performPacketActions(Packet p){
 		if(Helper.DEBUG_RCV) System.out.println("Packet "+p.header.packetID+" successfully received and processed in node: " +ID);
+		packetReceivedCount++;
+		timeOfPacketReception.put(p.header.packetID, Engine.simTime);
+
+
 		/**
 		 * TODO: all logic needed !
 		 */
@@ -580,6 +615,11 @@ class Node {
 	 */
 	double getCurrentBatteryLevel(){return battery.energyLevel;}
 	
+	double getCurrentEnergyLevel(){return battery.currentEnergytmp;}
+	double getInitialEnergyLevel(){return battery.initialEnergy;}	
+	double getUsedEnergyLevel(){return battery.usedEnergy1;}
+
+	
 	
 //==================================================================================================//
 //=================================== Node.Cache: CLASS ============================================//
@@ -598,12 +638,13 @@ class Node {
 		}
 		
 		private boolean isThePacketInCache(Packet thePacket){
-			if (Helper.DEBUG_CACHE)	System.out.println("Node.isThePacketInCache(), node: "+ID+" - received packet ID: " +thePacket.header.packetID+"\nCache state:");
+			if (Helper.DEBUG_CACHE)	System.out.print("Node.isThePacketInCache(), node: "+ID+" - received packet ID: " +thePacket.header.packetID+"\nCache state: ");
+			boolean response=false;
 			for (CachedPacket cp : listOfPackets){
-				if (Helper.DEBUG_CACHE) System.out.println(""+cp.packetID);
-				if (cp.packetID.equals(thePacket.header.packetID)) return true;
+				if (cp.packetID.equals(thePacket.header.packetID)) response=true;
 			}
-			return false;
+			if (Helper.DEBUG_CACHE) System.out.println(response);
+			return response;
 		}
 		/**
 		 * Add packet to the list of cached packets.
@@ -656,8 +697,10 @@ class Node {
 		private float nominalVoltage;		//V
 		private double initialEnergy;		//mWh
 		private double currentEnergy;		//mWh
+		private double currentEnergytmp;		//mWh
 		private double energyLevel=100.0f; 	//in percents - 100.0 fully charged, 0.0 discharged
 		private float timeOfLastUpdate;		//s
+		private double usedEnergy1;
 		/**
 		 * <pre>
 		 * Initiates a battery parameters.
@@ -723,9 +766,11 @@ class Node {
 		 */
 		private void drainBattery(float currentPowerConsumption){
 			double usedEnergy=currentPowerConsumption*(Engine.simTime-timeOfLastUpdate)/3600; //time is in seconds, but energy in mWh -> 1mWs = 1/3600 mWh 		
-			currentEnergy=currentEnergy-usedEnergy;		
+			currentEnergy=currentEnergy-usedEnergy;	
+			currentEnergytmp=currentEnergy-usedEnergy;
 			energyLevel=currentEnergy/initialEnergy*100; //current energy lvl (in %)
 			timeOfLastUpdate=Engine.simTime;
+			usedEnergy1=initialEnergy-currentEnergytmp;
 		}
 	}	
 	
@@ -791,9 +836,10 @@ class Node {
 			 * For now: All packets destination -> nodeID = 1 
 			 */
 			byte destID=1;
-			byte TTL=10;	//time to live, TODO: it is not checked anywhere...
+			byte TTL=20;	//time to live, TODO: it is not checked anywhere...
 			Packet P = new Packet(n, destID, packetNumber, packetSize, TTL);  		//create packet
-			timeOfNextGen=Engine.simTime+intervalGenerator.calculateInterval();		//update the time of next generation:
+			float tempT=intervalGenerator.calculateInterval();
+			timeOfNextGen=Engine.simTime+tempT;		//update the time of next generation:
 			packetNumber++;
 			return P;
 		}		
@@ -921,15 +967,15 @@ class Node {
 			 float SNR=getSNR();
 			 if (Helper.DEBUG_NOISE) System.out.println("Node.Transmission.getProbabilityOfSuccessfullSync(), SNR: "+SNR);
 			 if (SNR<MIN_SNR_SYNC_P0) return 0;
-			 else if(SNR>MIN_SNR_SYNC_P1) return 1;
-			 else{	 
-				 //relative position in span between minSNRsync(P0) and minSNRsync(P1) level	 
-				 float relativeSNR=(SNR-MIN_SNR_SYNC_P0)/(MIN_SNR_SYNC_P1-MIN_SNR_SYNC_P0); //value between 0-1 
-				 //TODO: realistic function
-				 //I've assumed that the probability is equal to relativeSNR^(1/2) 
-				 float procSNR=(float)(Math.pow(relativeSNR,0.5));
-				 return procSNR;		 
-			 }
+			 else return 1;
+//			 else{	 
+//				 //relative position in span between minSNRsync(P0) and minSNRsync(P1) level	 
+//				 float relativeSNR=(SNR-MIN_SNR_SYNC_P0)/(MIN_SNR_SYNC_P1-MIN_SNR_SYNC_P0); //value between 0-1 
+//				 //TODO: realistic function
+//				 //I've assumed that the probability is equal to relativeSNR^(1/2) 
+//				 float procSNR=(float)(Math.pow(relativeSNR,0.5));
+//				 return procSNR;		 
+//			 }
 		 }
 		 /**
 		  * TODO: How to calculate probability of successfull reception ?
@@ -943,14 +989,14 @@ class Node {
 			 float SNR=getSNR();
 			 if (Helper.DEBUG_NOISE)  System.out.println("Node.Transmission.getProbabilityOfSuccessfullReception(), SNR: "+SNR);
 			 if (SNR<MIN_SNR_RCVD_P0) return 0;
-			 else if(SNR>MIN_SNR_RCVD_P1) return 1;
-			 else{		 
-				 //get relative position in span between minSNR(P0) and minSNR(P1) level	 
-				 float relativeSNR=(SNR-MIN_SNR_RCVD_P0)/(MIN_SNR_RCVD_P1-MIN_SNR_RCVD_P0); //value between 0-1 
-				 //TODO: realistic function
-				 //I've assumed that the probability is equal to relativeSNR^(1/3) 
-				 return (float)(Math.pow(relativeSNR,1/3));
-			 }
+			 else return 1;
+//			 else{		 
+//				 //get relative position in span between minSNR(P0) and minSNR(P1) level	 
+//				 float relativeSNR=(SNR-MIN_SNR_RCVD_P0)/(MIN_SNR_RCVD_P1-MIN_SNR_RCVD_P0); //value between 0-1 
+//				 //TODO: realistic function
+//				 //I've assumed that the probability is equal to relativeSNR^(1/3) 
+//				 return (float)(Math.pow(relativeSNR,1/3));
+//			 }
 		 }
 	}
 		 

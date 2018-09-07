@@ -46,7 +46,7 @@ class Medium {
 	/**
 	 * Matrix of transmission power decrease due to distance between nodes.
 	 */
-	private static float[][] distancePowerDecreaseMatrix=new float[Engine.NR_OF_NODES][Engine.NR_OF_NODES];
+	private static float[][] distancePowerDecreaseMatrix=new float[Topology.NR_OF_NODES][Topology.NR_OF_NODES];
 
 	
 	/**
@@ -54,7 +54,7 @@ class Medium {
 	 */
 	Medium(){
 		fillDistancePowerDecreaseMatrix();
-		for (byte i=0;i<Engine.NR_OF_NODES;i++){
+		for (byte i=0;i<Topology.NR_OF_NODES;i++){
 			globalNoiseLvl.add(BACKGROUND_NOISE);	//initialize noise lvl equal to background noise
 		}
 	}
@@ -133,8 +133,8 @@ class Medium {
 	 * Initializes power decrease matrix. The decrease depends on nodes distance.
 	 */
 	private void fillDistancePowerDecreaseMatrix(){
-	for (byte i=0; i<Engine.NR_OF_NODES;i++)
-		for (byte j=0; j<Engine.NR_OF_NODES;j++)
+	for (byte i=0; i<Topology.NR_OF_NODES;i++)
+		for (byte j=0; j<Topology.NR_OF_NODES;j++)
 			distancePowerDecreaseMatrix[i][j]=getDistancePowerDecrease(Engine.LIST_OF_NODES.get(i).position, Engine.LIST_OF_NODES.get(j).position);
 	}
 	/**
