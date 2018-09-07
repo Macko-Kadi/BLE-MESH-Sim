@@ -1,3 +1,8 @@
+/************************************************************************
+Description : Class for creating topology from a file
+Created by : Dominika Zawiślak
+************************************************************************/
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;

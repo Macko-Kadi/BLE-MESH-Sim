@@ -1,3 +1,8 @@
+/************************************************************************
+Description : 
+Created by : Dominika ZawiÅ›lak
+************************************************************************/
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -88,7 +93,7 @@ public class resultsTable {
 		}
 		writer.println("Total energy used in simulation: " + totalEnergy*1000 + "uWh \n");
 		calculateConfidenceInterval(Energy);
-		writer.println("Average amount of energy used in simulation: " + mean*1000 +" ± " + confidenceInterval*1000+ " uWh \n");
+		writer.println("Average amount of energy used in simulation: " + mean*1000 +" ï¿½ " + confidenceInterval*1000+ " uWh \n");
 		writer.println("Smallest amount of used energy " + minEnergy*1000 + " uWh, by node(s) " + minNodes + " \n");
 		writer.println("Biggest amount of used energy " + maxEnergy*1000 + " uWh, by node(s) " + maxNodes + " \n");
 		writer.println("========================================================================= \n");
@@ -116,7 +121,7 @@ public class resultsTable {
 	private static void meanPacketDelay() {
 	calculateConfidenceInterval(Delay);
 	
-	writer.println("Average packet delay in simulation: " + mean +" ± " + confidenceInterval+ " \n");
+	writer.println("Average packet delay in simulation: " + mean +" ï¿½ " + confidenceInterval+ " \n");
 	writer.println("========================================================================= \n");
 	}
 
@@ -132,7 +137,7 @@ public class resultsTable {
 	}
 
 	private static void hopsCounter() {
-	//	writer.println("iloœæ przeskoków ? "+"\n");
+	//	writer.println("iloï¿½ï¿½ przeskokï¿½w ? "+"\n");
 		for (Packet p : Node.packetList) {
 	//		writer.println("Packet: "+p.header.packetID+"	 TTL: "+p.header.TTL+"\n");
 			double hops = 20-(double) p.header.TTL;
@@ -144,7 +149,7 @@ public class resultsTable {
 	private static void meanHops() {
 	calculateConfidenceInterval(Hops);
 	
-	writer.println("Average amount of hops made by a packet: " + mean +" ± " + confidenceInterval+ " \n");
+	writer.println("Average amount of hops made by a packet: " + mean +" ï¿½ " + confidenceInterval+ " \n");
 	writer.println("========================================================================= \n");
 	}
 

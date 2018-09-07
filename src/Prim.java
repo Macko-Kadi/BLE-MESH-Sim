@@ -1,3 +1,8 @@
+/************************************************************************
+Description : Prim Algorithm implementation
+Created by : Dominika Zawiślak
+************************************************************************/
+
 import java.util.*;
 import java.util.Map.Entry;
 

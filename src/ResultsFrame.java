@@ -1,3 +1,8 @@
+/************************************************************************
+Description : 
+Created by : Dominika ZawiÅ›lak
+************************************************************************/
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -115,7 +120,7 @@ public class ResultsFrame extends javax.swing.JFrame {
 	}
 
 	private static void hopsCounterFrame() {
-		ResultsFrame.textArea1.append("iloœæ przeskoków? "+"\n");
+		ResultsFrame.textArea1.append("iloï¿½ï¿½ przeskokï¿½w? "+"\n");
 		for (Packet p : Node.packetList) {
 			ResultsFrame.textArea1.append("Packet: "+p.header.packetID+" 	TTL: "+p.header.TTL+"\n");
 		}

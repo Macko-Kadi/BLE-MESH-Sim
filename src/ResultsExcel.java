@@ -1,3 +1,8 @@
+/************************************************************************
+Description : Class for transferring simulation result into a .xls file
+Created by : Dominika ZawiÅ›lak
+************************************************************************/
+
 import  java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -72,7 +77,7 @@ public class ResultsExcel {
     		
             HSSFRow row1 = sheet.createRow((short)1);
             row1.createCell(0).setCellValue("Average amount of energy used in simulation");
-            row1.createCell(1).setCellValue(mean*1000 +" ± " + confidenceInterval*1000);
+            row1.createCell(1).setCellValue(mean*1000 +" ï¿½ " + confidenceInterval*1000);
             
             HSSFRow row2 = sheet.createRow((short)2);
             row2.createCell(0).setCellValue("Smallest amount of used energy");
@@ -114,7 +119,7 @@ public class ResultsExcel {
         	
             HSSFRow row9 = sheet.createRow((short)9);
             row9.createCell(0).setCellValue("Average amount of hops made by a packet: ");
-            row9.createCell(1).setCellValue(mean +" ± " + confidenceInterval);
+            row9.createCell(1).setCellValue(mean +" ï¿½ " + confidenceInterval);
             
     		for (Entry<String, Float> startPacket : Node.timeOfPacketGeneration.entrySet()) {
     			String tmppacketID = startPacket.getKey();
@@ -131,7 +136,7 @@ public class ResultsExcel {
         	
             HSSFRow row10 = sheet.createRow((short)10);
             row10.createCell(0).setCellValue("Average packet delay in simulation: ");
-            row10.createCell(1).setCellValue(mean +" ± " + confidenceInterval);
+            row10.createCell(1).setCellValue(mean +" ï¿½ " + confidenceInterval);
             
             HSSFRow row11 = sheet.createRow((short)11);
             row11.createCell(0).setCellValue("Number of collisions during simulation: ");

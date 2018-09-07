@@ -1,3 +1,8 @@
+/************************************************************************
+Description : Minimum Relay Tree Algorithm Implementation
+Created by : Dominika Zawiślak
+************************************************************************/
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;

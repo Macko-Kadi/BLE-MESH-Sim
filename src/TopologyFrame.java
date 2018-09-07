@@ -1,3 +1,8 @@
+/************************************************************************
+Description : 
+Created by : Dominika Zawiślak
+************************************************************************/
+
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.Map;

@@ -1,3 +1,8 @@
+/************************************************************************
+Description : Provisioner class for managing algorithms
+Created by : Dominika Zawiślak
+************************************************************************/
+
 import java.util.ArrayList;
 import java.util.Map;
 
