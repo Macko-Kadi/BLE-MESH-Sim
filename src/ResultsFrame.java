@@ -1,5 +1,5 @@
 /************************************************************************
-Description : 
+Description : Frame for displaying results
 Created by : Dominika Zawiślak
 ************************************************************************/
 
@@ -12,12 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  *
