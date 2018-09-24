@@ -34,8 +34,18 @@ class Engine {
 			 * All packets triggered in the example:
 			 */
 			eventList.addEventsFromList(LIST_OF_NODES.get(i).generatePacket());
+			eventList.printEvents();
 		}	
 		final Medium medium = new Medium();	// we use only static methods, so ignore the warning. However, we need to instantiate the object in order to have proper path loss matrix and so on.
+	for(byte i=0; i<NR_OF_NODES; i++){
+		for(byte j=0; j<NR_OF_NODES;j++){
+			float powerRcv=Node.MAX_TRANSMISSION_POWER-Node.MAX_TRANSMISSION_POWER*medium.Pld0_Pt-medium.getPowerDecreaseBetweenNodes(i,j);
+			float SNR=powerRcv-Medium.BACKGROUND_NOISE;
+			System.out.println("SNR in relation (" + i +","+ j+") :" +SNR);
+		}
+	}
+		
+		
 		//same as with packet generation - first BATTERY_CHECK event must be triggered manually
 		eventList.addEventsFromList(checkGlobalBatteryLevels());
 		//there is no logic behind energy_saving_mode so, for the example purposes -> all nodes go sleep at 0.017088s (for 305s - the value is defined in the Node.goSleep() function).

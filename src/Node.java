@@ -40,7 +40,7 @@ class Node {
 	 * TODO: confirm the value
 	 * </pre>
 	 */
-	private static final float MAX_TRANSMISSION_POWER=10;	
+	public static final float MAX_TRANSMISSION_POWER=10;	
 	/**
 	 * If noise power is greater than the level - phyState=3 (CCA_BUSY) - a node can't start transmission
 	 */
@@ -300,7 +300,7 @@ class Node {
 	 */
 	Event addPacketToQueue(Packet p){	
 		queue.add(p);
-		if(queue.size()==1 && !phyState.equals("TX"))return startBackoffProcedure();
+		if(queue.size()==1 && !phyState.equals("TX"))return startBackoffProcedure();		
 		else return null;
 	}
 	/**
@@ -885,6 +885,7 @@ class Node {
 		 */
 		private float getSNR(){
 			 if (Helper.DEBUG_NOISE) System.out.println("getSNR() -> reception power " + receptionPower +" getMaxNoise: "+getMaxNoise());
+			// System.out.println(""+ ID + " " +(receptionPower-getMaxNoise()));
 			 return receptionPower-getMaxNoise();
 		}
 		/**
