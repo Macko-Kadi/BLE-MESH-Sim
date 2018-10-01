@@ -41,7 +41,7 @@ class Node {
 	 * advInterval varies from 20ms to 10s (can be adjusted)
 	 * in the nordic implementation it is set to 3ms, same here
 	 */
-	static final float ADV_INTERVAL=0.02f;
+	static final float ADV_INTERVAL=0.003f;
 	/**
 	 * According to NOTES BLE - Advertising Events are scheduled with a gap equal to (const)advInterval+(random)advDelay 
 	 * advDelay is in the range of 0 to 10 ms, k*ADV_INTERVAL_SLOT, where k=0:16, ADV_INTERVAL_SLOT=0.625ms=0.000625s
@@ -60,17 +60,13 @@ class Node {
 	 */
 	public static final float MAX_TRANSMISSION_POWER=10;	
 	/**
-	 * If noise power is greater than the level - phyState=3 (CCA_BUSY) - a node can't start transmission
-	 */
-	private static final float ENERGY_DETECTION_THRESHOLD=-30;
-	/**
 	 * <pre>
 	 * ATTENTION: It is important to distinguish synchronization and data reception phases. 
 	 * 
 	 * We should prevent situation when a node synchronizes to a transmission that has no chance to be successfully received.
 	 * It is important, because, when a node is synchronized to one transmission (phyState=="SYNC"), all other transmissions cannot be synchronized (thus successfully received).
 	 *  
-	 * Minimum SNR level required for non zero probability of successfull synchronization.
+	 * Minimum SNR level required for non zero probability of successful synchronization.
 	 * If the level is lower than the value a node has no chance to sync to the transmission.
 	 * 
 	 * If the value should be different for different nodes, remove 'static'.
@@ -227,11 +223,6 @@ class Node {
 	public static Map<String, Double> timeOfPacketGeneration = new HashMap<String, Double>();
 	public static Map<String,Double> timeOfPacketReception=new HashMap<String, Double>();
 
-//	I've decided to make it very simple so I don't use the BackoffCounter object at the moment
-//	/**
-//	 * Counter for backoff time
-//	 */
-//	private BackoffCounter backoffCounter;
 	/**
 	 * Node constructor
 	 * 
@@ -255,7 +246,7 @@ class Node {
 	/**
 	 * Tries to start a transmission procedure. 
 	 * @return Next START_ADVERTISING_EVENT, and if is able to transmit schedules 3x START_TRANSMISSION and END_OF_ADVERTISING_EVENT events,
-	 * If there is nothing to send or nodeState is not equal to IDLE (e.g. TURNED_OFF)
+	 * If there is nothing to send or nodeState is not equal to IDLE (e.g. TURNED_OFF) schedules only next START_ADVERTISING_EVENT
 	 */
 	ArrayList<Event> startAdvertisingEvent(){		
 		ArrayList<Event> list = new ArrayList<Event>();
@@ -579,7 +570,6 @@ class Node {
 	 * </pre>
 	 */
 	void updateTransmissionPower(){
-		if (batteryPowered) drainBattery();
 		if (Helper.SIMPLE_SNR) return; //when the flag is set, always send packets with the same power
 		currentTransmissionPower=(float)(Math.min(MAX_TRANSMISSION_POWER, MAX_TRANSMISSION_POWER-6*(0.5-battery.energyLevel/100)));
 	}
@@ -1096,70 +1086,4 @@ class Node {
 			}	
 		}
 		
-		
-		
-		
-	
-//	/**
-//	 * 
-//	 * I've decided to use very simple counting scheme - the object is not needed at the moment - if needed -> toggle comment (CTRL+7)
-//	 * 
-//	 * TODO: Should be extended, eg. MAX_BACKOFF_TIME may change, the counter may be paused...
-//	 */
-//	class BackoffCounter{
-//		/**
-//		 * <pre>
-//		 * Backoff value is generated from 0 to MAX_BACKOFF_TIME (in seconds)
-//		 * Unslotted version (non synchronized network)
-//		 * 
-//		 * TODO: I assumed that the backoff value DOES NOT stop when CCA_BUSY. 
-//		 * Just counting down counter, when 0 -> check noise level -> if low enough -> start transmission
-//		 * 														   -> if not -> start another backoff procedure				
-//		 * 
-//		 * TODO: (?) Also, the MAX_BACKOFF_TIME does not increase after unsuccessful start of the transmission	
-//		 * </pre>																		
-//		 */
-//		private final float MAX_BACKOFF_TIME=0.1f; //100ms - is this value realistic ?
-//		private float timer;
-//		private final float timeOfStart;
-//		private float timeOfEnd;
-//
-//		BackoffCounter(){
-//			timeOfStart=Engine.simTime;
-//			timer=getInitialBackoffTime();
-//			timeOfEnd=timeOfStart+timer;
-//		}
-//		/**
-//		 * Well, I've decided not to complicate the simulator at this stage so the functions are not used anywere
-//		 *
-//		 *
-//		private float pauseTime;
-//		private float unpauseTime;
-//		private boolean paused=false;
-//		void pause(){
-//			if (!paused){
-//				paused=true;
-//				pauseTime=Engine.simTime;
-//			}
-//		}
-//		void unpause(){
-//			if (paused){
-//				unpauseTime=Engine.simTime;
-//				//moment of the procedure end is increased by the pause period
-//				timeOfEnd=timeOfEnd+unpauseTime-pauseTime;
-//				paused=false;
-//			}
-//		}
-//		float getTimeOfProcedureEnd(){
-//			//if backoff counter is paused - time of the end is unknown.
-//			if (paused)	return Float.MAX_VALUE;
-//			else		return timeOfEnd;
-//		}*/
-//		float getTimeOfProcedureEnd(){
-//			return timeOfEnd;
-//		}
-//		float getInitialBackoffTime(){
-//			return Helper.generator.nextFloat()*MAX_BACKOFF_TIME;
-//		}
-//	}
 }
