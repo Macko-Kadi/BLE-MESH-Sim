@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 /**
  * <pre>
- * Main class of the simulator. Everything starts and ends here.
+ *  Main class of the simulator. Everything starts and ends here.
  * You create an environment here 
  * </pre>
  * @author macso
