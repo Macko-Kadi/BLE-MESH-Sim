@@ -19,10 +19,21 @@ public final class Helper {
 	//you may set what you want to debugg
 	public static boolean DEBUG_RCV=false;  
 	public static boolean DEBUG_EVENTS=false;  
-	public static boolean DEBUG_CACHE=true;
+	public static boolean DEBUG_ADVERTISING_EVENT=false; //it should rather always be false
+	public static boolean DEBUG_CACHE=false;
 	public static boolean DEBUG_NOISE=false;
 	public static boolean DEBUG_TRANS=false;
 	public static boolean DEBUG_STATE=false;
+	public static boolean DEBUG_SWITCH_CHANNEL=false;
+
+	
+	/**
+	 * when the flag is set to true - all noises with power below SIMPLE_SNR_TRESHOLD are set as neglible small = -80dBm
+	 * also, node transmission power is independent to battery level (removes node.updateTransmissionPower() function)
+	 * 
+	 */
+	public static boolean SIMPLE_SNR=true; 
+	public static float SIMPLE_SNR_TRESHOLD=-55f;
 	
 	public static int ROUND_DEC=3; 		// you may use this parameter whenever you will round a value
 	public static Random generator=new Random(2347321); //just a common random number generator

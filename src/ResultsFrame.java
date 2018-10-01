@@ -107,7 +107,7 @@ public class ResultsFrame extends javax.swing.JFrame {
 
 	private static void packetLossFrame() {
 		ResultsFrame.textArea1.append("Packet loss:  \n");
-		ResultsFrame.textArea1.append("Number of generated messages: " + Node.packetCount + "\n");
+		ResultsFrame.textArea1.append("Number of generated messages: " + Node.generatedPacketCount + "\n");
 		ResultsFrame.textArea1.append("Number of received messages: " + Node.packetReceivedCount + "\n");
 		ResultsFrame.textArea1.append("Number of backoff procedures: " + Node.retransmit + "\n");
 		ResultsFrame.textArea1.append("========================================================================= \n");

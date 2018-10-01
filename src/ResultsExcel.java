@@ -26,7 +26,7 @@ public class ResultsExcel {
 	
     public static void initExcelResults() {
         try {
-            String filename = "C:\\Users\\Dominika.Zawislak\\Desktop\\is\\BLE-MESH-Sim-master\\simresults\\test.xls";
+            String filename = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\test.xls";
             HSSFWorkbook workbook = new HSSFWorkbook();
             HSSFSheet sheet = workbook.createSheet("FirstSheet");
 
@@ -89,13 +89,13 @@ public class ResultsExcel {
             
             HSSFRow row4 = sheet.createRow((short)4);
             row4.createCell(0).setCellValue("Number of generated messages: ");
-            row4.createCell(1).setCellValue((Node.packetCount-1));
+            row4.createCell(1).setCellValue(Node.generatedPacketCount);
             
             HSSFRow row5 = sheet.createRow((short)5);
             row5.createCell(0).setCellValue("Number of received messages: ");
             row5.createCell(1).setCellValue(Node.packetReceivedCount);
 
-            double difference = Node.packetCount-1 -Node.packetReceivedCount; 
+            double difference = Node.generatedPacketCount-1 -Node.packetReceivedCount; 
             HSSFRow row6 = sheet.createRow((short)6);
             row6.createCell(0).setCellValue("Difference: ");
             row6.createCell(1).setCellValue(difference);
@@ -121,10 +121,10 @@ public class ResultsExcel {
             row9.createCell(0).setCellValue("Average amount of hops made by a packet: ");
             row9.createCell(1).setCellValue(mean +" � " + confidenceInterval);
             
-    		for (Entry<String, Float> startPacket : Node.timeOfPacketGeneration.entrySet()) {
+    		for (Entry<String, Double> startPacket : Node.timeOfPacketGeneration.entrySet()) {
     			String tmppacketID = startPacket.getKey();
-    			Float tmppacketStart = startPacket.getValue();
-    			for (Entry<String, Float> receivePacket: Node.timeOfPacketReception.entrySet()) {
+    			Double tmppacketStart = startPacket.getValue();
+    			for (Entry<String, Double> receivePacket: Node.timeOfPacketReception.entrySet()) {
     				if(receivePacket.getKey().equals(tmppacketID)) {
     					Double packetDelay = (double) (receivePacket.getValue() - tmppacketStart);
     					Delay.add(packetDelay);

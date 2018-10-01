@@ -14,13 +14,13 @@ import java.util.Map;
 
 public class Topology {
 
-	public static String topologyFilePath = "C:\\Users\\Dominika.Zawislak\\Desktop\\is\\BLE-MESH-Sim-master\\testtopology\\";
-//	public static String topologyFileName = ("4_mesh.txt");
+	public static String topologyFilePath = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\testtopology\\";
+	public static String topologyFileName = ("4_mesh.txt");
 //	public static String topologyFileName = ("9_chain.txt");
 //	public static String topologyFileName = ("17_chain_dense.txt");
 //	public static String topologyFileName = ("12_mesh.txt");
-//	public static String topologyFileName = ("25_mesh_dense.txt");
-	public static String topologyFileName = ("30_U.txt");
+// public static String topologyFileName = ("25_mesh_dense.txt");
+//	public static String topologyFileName = ("30_U.txt");
 //	public static String topologyFileName = ("_U.txt");
 	public static String topologyFile = (topologyFilePath+topologyFileName);
 	public static String topologyType;

@@ -24,7 +24,7 @@ public class resultsTable {
 	public static void simulationResultsTable() {
 
 		try {
-			String path = "C:\\Users\\Dominika.Zawislak\\Desktop\\is\\BLE-MESH-Sim-master\\simresults\\table\\";
+			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\tables\\";
 			String fileName = (Engine.algorithm + "_" + Topology.topologyType + "_" + Topology.NR_OF_NODES + ".txt");
 			writer = new PrintWriter(path + fileName, "UTF-8");
 		} catch (FileNotFoundException e) {
@@ -104,10 +104,10 @@ public class resultsTable {
 	private static void packetDelay() {
 //		writer.println("Delay (period of time between packet generation and packet being received): "+"\n");
 		
-		for (Entry<String, Float> startPacket : Node.timeOfPacketGeneration.entrySet()) {
+		for (Entry<String, Double> startPacket : Node.timeOfPacketGeneration.entrySet()) {
 			String tmppacketID = startPacket.getKey();
-			Float tmppacketStart = startPacket.getValue();
-			for (Entry<String, Float> receivePacket: Node.timeOfPacketReception.entrySet()) {
+			Double tmppacketStart = startPacket.getValue();
+			for (Entry<String, Double> receivePacket: Node.timeOfPacketReception.entrySet()) {
 				if(receivePacket.getKey().equals(tmppacketID)) {
 					Double packetDelay = (double) (receivePacket.getValue() - tmppacketStart);
 //					writer.println("Delay: "+packetDelay+" \n");
@@ -128,9 +128,9 @@ public class resultsTable {
 
 	private static void packetLoss() {
 		writer.println("Packet loss:  \n");
-		writer.println("Number of generated messages: " + (Node.packetCount-1) + "\n");
+		writer.println("Number of generated messages: " + (Node.generatedPacketCount-1) + "\n");
 		writer.println("Number of received messages: " + Node.packetReceivedCount + "\n");
-		double difference = Node.packetCount-1 -Node.packetReceivedCount; 
+		double difference = Node.generatedPacketCount-1 -Node.packetReceivedCount; 
 		writer.println("Difference: " + difference + " \n");
 		writer.println("Number of backoff procedures: " + Node.retransmit + "\n");
 		writer.println("========================================================================= \n");

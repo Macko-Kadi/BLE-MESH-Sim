@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.ArrayList;
 
 /**
@@ -26,11 +27,30 @@ class Medium {
 	static ArrayList<Transmission> currentTransmissions=new ArrayList<Transmission>();
 	/**
 	 * <pre>
-	 *List of noise lvls (for all nodes). 
+	 *List of noise lvls (channel 37) (for all nodes). 
 	 *Values in the list are calculated with taking into account, that node synced reception and a transmission that node transmit is NOT a noise from the node perspective.
 	 *</pre>
 	 */
-	static ArrayList<Float> globalNoiseLvl = new ArrayList<Float>();
+	static ArrayList<Float> globalNoiseLvl37 = new ArrayList<Float>();
+	/**
+	 * <pre>
+	 *List of noise lvls (channel 38) (for all nodes). 
+	 *Values in the list are calculated with taking into account, that node synced reception and a transmission that node transmit is NOT a noise from the node perspective.
+	 *</pre>
+	 */
+	static ArrayList<Float> globalNoiseLvl38 = new ArrayList<Float>();
+	/**
+	 * <pre>
+	 *List of noise lvls (channel 39) (for all nodes). 
+	 *Values in the list are calculated with taking into account, that node synced reception and a transmission that node transmit is NOT a noise from the node perspective.
+	 *</pre>
+	 */
+	static ArrayList<Float> globalNoiseLvl39 = new ArrayList<Float>();
+	/**
+	 * Noises per channel
+	 */
+	static List<Float>[] globalNoiseLvl = new List[3];
+	
 	/**
 	 *Path loss propagation model - From the document: Yet Another Network Simulator (auth. Lacage, Henderson), chapter 8.1
 	 *Pl(d)=Pl(d0)+n*10*log_10(d/d0)
@@ -50,12 +70,17 @@ class Medium {
 
 	
 	/**
-	 *Constructor. Initializes power decrease matrix on the basis of nodes distances, also sets background noise to global noise lvl.
+	 *Constructor. Initializes power decrease matrix on the basis of nodes distances, also sets background noise as global noise lvl (for each channel).
 	 */
 	Medium(){
 		fillDistancePowerDecreaseMatrix();
+		globalNoiseLvl[0]=globalNoiseLvl37;
+		globalNoiseLvl[1]=globalNoiseLvl38;
+		globalNoiseLvl[2]=globalNoiseLvl39;
 		for (byte i=0;i<Topology.NR_OF_NODES;i++){
-			globalNoiseLvl.add(BACKGROUND_NOISE);	//initialize noise lvl equal to background noise
+			globalNoiseLvl[0].add(BACKGROUND_NOISE);	//initialize noise lvls equal to background noise
+			globalNoiseLvl[1].add(BACKGROUND_NOISE);	//initialize noise lvls equal to background noise
+			globalNoiseLvl[2].add(BACKGROUND_NOISE);	//initialize noise lvls equal to background noise
 		}
 	}
 //==================================================================================================//
@@ -72,7 +97,7 @@ class Medium {
 	 */
 	static void addCurrentTransmission(Transmission t){
 		currentTransmissions.add(t);
-		updateGlobalNoiseLvls();
+		updateGlobalNoiseLvls(t.channel);
 	}
 	/**
 	 * find the transmission t in the list of current transmissions and remove it from the list. Then, update noise lvls.
@@ -82,17 +107,19 @@ class Medium {
 		for (int i=0;i<currentTransmissions.size();i++)
 			if (currentTransmissions.get(i).equals(t))
 				currentTransmissions.remove(i);
-		updateGlobalNoiseLvls();
+		updateGlobalNoiseLvls(t.channel);
 	}
 	/**
 	 * Global noise lvl update (for each node).
 	 * @see Medium#updateNoiseLvlForAReceiver(Node, ArrayList)
 	 */
-	static void updateGlobalNoiseLvls(){
+	static void updateGlobalNoiseLvls(byte channel_){
 		ArrayList<Byte> currentlyTransmittingNodes=getListOfcurrentlyTransmittingNodes();
 		//for each receiver (I mean - node)
 		for (Node n : Engine.LIST_OF_NODES){
-			globalNoiseLvl.set(n.ID, updateNoiseLvlForAReceiver(n, currentlyTransmittingNodes));
+			globalNoiseLvl[0].set(n.ID, updateNoiseLvlForAReceiverOnChannel(n, currentlyTransmittingNodes,(byte)0));
+			globalNoiseLvl[1].set(n.ID, updateNoiseLvlForAReceiverOnChannel(n, currentlyTransmittingNodes,(byte)1));
+			globalNoiseLvl[2].set(n.ID, updateNoiseLvlForAReceiverOnChannel(n, currentlyTransmittingNodes,(byte)2));
 		}
 	}
 	/**
@@ -103,11 +130,11 @@ class Medium {
 	 * @return noise lvl as seen by the receiver
 	 *
 	 */
-	static float updateNoiseLvlForAReceiver(Node receiver, ArrayList<Byte> transmittersIDs){
+	static float updateNoiseLvlForAReceiverOnChannel(Node receiver, ArrayList<Byte> transmittersIDs, byte channel){
 		ArrayList<Float> powers=new ArrayList<Float>();
-		for (byte i : transmittersIDs){			//for all transmittin nodes
+		for (byte i : transmittersIDs){			//for all transmitting nodes
 			Node n = Engine.LIST_OF_NODES.get(i); //get a transmitting node A
-			if (receiver.ID != n.ID){			//don't add transmission of node A to the node A noise lvl.			
+			if ((receiver.ID != n.ID) && channel==n.currentTransmission.channel){	//don't add transmission of node A to the node A noise lvl, and add it only when considered channel is the same as the transmission channel 		
 				if(receiver.syncedReception==null)									//if the receiver is not synced to a transmission, treat the transmission as a noise 
 					powers.add(getReceptionPower(n.currentTransmission, receiver.ID));				
 				else if (receiver.syncedReception.transmission.transmitterID!=n.ID)  //or, if it is synced, ommit the transmission
@@ -124,8 +151,8 @@ class Medium {
 	static ArrayList<Byte>	getListOfcurrentlyTransmittingNodes(){
 		ArrayList<Byte> theList = new ArrayList<Byte>();
 		for (Node n : Engine.LIST_OF_NODES){
-			if (Helper.DEBUG_NOISE) System.out.println("Medium.getListOfcurrentlyTransmittingNodes(), node: " + n.ID + " phyState "+n.getPhyState());
-			if (n.getPhyState().equals("TX")) theList.add(n.ID);	
+			if (Helper.DEBUG_NOISE) System.out.println("Medium.getListOfcurrentlyTransmittingNodes(), node: " + n.ID + " nodeState "+n.getNodeState());
+			if (n.getNodeState().equals("TRANSMITTING")) theList.add(n.ID);	
 		}
 		return theList;
 	}
@@ -160,7 +187,7 @@ class Medium {
 	 */
 	static float getReceptionPower(Transmission transmission, byte receiverID){
 		float power=transmission.power-transmission.power*Pld0_Pt-getPowerDecreaseBetweenNodes(transmission.transmitterID,receiverID);	
-		if (Helper.DEBUG_NOISE)System.out.println("Node "+ receiverID +" reception Power " + power);
+		if (Helper.DEBUG_NOISE)System.out.println("Node "+ receiverID +" reception Power " + power+" on channel " +transmission.channel);
 		return power;
 	}
 	/**
@@ -174,5 +201,5 @@ class Medium {
 	 * @param nodeID
 	 * @return noise lvl seen by node of nodeID ID
 	 */
-	static float getNoise(byte nodeID){	return globalNoiseLvl.get(nodeID);}
+	static float getNoise(byte nodeID, byte channel){	return globalNoiseLvl[channel].get(nodeID);}
 }

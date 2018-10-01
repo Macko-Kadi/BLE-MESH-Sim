@@ -24,7 +24,7 @@ public class Results {
 	public static void simulationResults() {
 
 		try {
-			String path = "C:\\Users\\Dominika.Zawislak\\Desktop\\is\\BLE-MESH-Sim-master\\simresults\\";
+			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\";
 			String fileName = (Engine.algorithm + "_" + Topology.topologyType + "_" + Topology.NR_OF_NODES + ".txt");
 			writer = new PrintWriter(path + fileName, "UTF-8");
 		} catch (FileNotFoundException e) {
@@ -124,10 +124,10 @@ public class Results {
 	private static void packetDelay() {
 		writer.println("Delay (period of time between packet generation and packet being received): "+"\n");
 		
-		for (Entry<String, Float> startPacket : Node.timeOfPacketGeneration.entrySet()) {
+		for (Entry<String, Double> startPacket : Node.timeOfPacketGeneration.entrySet()) {
 			String tmppacketID = startPacket.getKey();
-			Float tmppacketStart = startPacket.getValue();
-			for (Entry<String, Float> receivePacket: Node.timeOfPacketReception.entrySet()) {
+			Double tmppacketStart = startPacket.getValue();
+			for (Entry<String, Double> receivePacket: Node.timeOfPacketReception.entrySet()) {
 				if(receivePacket.getKey().equals(tmppacketID)) {
 					Double packetDelay = (double) (receivePacket.getValue() - tmppacketStart);
 					writer.println("Delay: "+packetDelay+" \n");
@@ -145,14 +145,29 @@ public class Results {
 	writer.println("========================================================================= \n");
 	}
 
-
+	/**
+	 * The function return packets that are still in queues of nodes (we should consider the number to approximate Ploss when system utilisation is high)
+	 * @return
+	 */
+	private static int getNumberOfPacketsInTheSystem(){
+		int number=0;
+		for(Node n : Engine.LIST_OF_NODES){
+			System.out.println("Node "+n.ID + " queue size: " + n.queue.size());
+			number+=n.queue.size();
+		}
+		return number;
+	}
+	//MACIEK coœ zle
 	private static void packetLoss() {
 		writer.println("Packet loss:  \n");
-		writer.println("Number of generated messages: " + (Node.packetCount-1) + "\n");
+		writer.println("Number of generated messages: " + (Node.generatedPacketCount) + "\n");
 		writer.println("Number of received messages: " + Node.packetReceivedCount + "\n");
+		int numberOfPacketsInTheSystem=getNumberOfPacketsInTheSystem();
+		writer.println("Number of packets in the system: " + numberOfPacketsInTheSystem+"\n");
 		writer.println("Number of backoff procedures: " + Node.retransmit + "\n");
-		double IPLR=(Node.packetCount-1)/Node.packetReceivedCount;
-		writer.println("IPLR: " + IPLR + " % \n");
+		float IPLRmax=100*(float)(Node.generatedPacketCount-Node.packetReceivedCount)/Node.generatedPacketCount;								 //MACIEK poprawka
+		float IPLRmin=100*(float)(Node.generatedPacketCount-Node.packetReceivedCount-numberOfPacketsInTheSystem)/Node.generatedPacketCount; //MACIEK poprawka
+		writer.println("IPLR is approximately: " + Helper.round(IPLRmin, 2) + "-"+Helper.round(IPLRmax, 2)+" % \n");
 		writer.println("========================================================================= \n");
 	}
 

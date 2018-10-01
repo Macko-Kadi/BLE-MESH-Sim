@@ -4,13 +4,15 @@ import java.util.Collections;
 	//comment added via website - will it syunchronize with my local repository ?
 
 class Event {
-	float startTime;
+	double startTime;
 	/**
 	
 	 * <pre>
 	 * Type of the event. For now there is a number of defined events:
 	 * PACKET_GENERATION
-	 * TRY_TO_START_TRANSMISSION
+	 * TRY_TO_START_TRANSMISSION_PROCEDURE
+	 * END_TRANSMISSION_PROCEDURE
+	 * START_TRANSMISSION
 	 * END_OF_TRANSMISSION
 	 * END_OF_SYNCED_RECEPTION
 	 * GO_SLEEP
@@ -25,8 +27,8 @@ class Event {
 	 * For now it is related node ID
 	 */
 	String metadata;
-	Event(float startTime_, String type_, String metadata_){
-		startTime=startTime_;
+	Event(double d, String type_, String metadata_){
+		startTime=d;
 		type=type_;
 		metadata=metadata_;
 	}
@@ -40,37 +42,55 @@ class Event {
 	 * @return New scheduled events
 	 */
 	ArrayList<Event> evaluateEvent(){
-		if (Helper.DEBUG_EVENTS) System.out.println("--evaluate Event--time: " +Engine.simTime+"----");
+		if (Helper.DEBUG_EVENTS && (type!="START_ADVERTISING_EVENT" || Helper.DEBUG_ADVERTISING_EVENT) && (type!="TRY_TO_SWITCH_CHANNEL" || Helper.DEBUG_SWITCH_CHANNEL))
+			System.out.println("--evaluate Event--time: " +Engine.simTime+"----");
 		byte nodeID; 										//ID of the note that is related with the event - it will be obtained from event metadata field.
 		ArrayList<Event> newEvents = new ArrayList<Event>();	//while an event is evaluated it may trigger another events -> we will return the new events as a list
 		switch (type){							
 			case "END_OF_SYNCED_RECEPTION":
-				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: END_OF_SYNCED_RECEPTION,\t ID: "+metadata);
+				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: END_OF_SYNCED_RECEPTION,\t ID: "+metadata + ", channel: "+this.getTransmission().channel);
 				nodeID=Byte.valueOf(metadata);
-				newEvents.add(Engine.LIST_OF_NODES.get(nodeID).endOfSyncedReception(this.getTransmission(), Engine.LIST_OF_NODES.get(nodeID)));
+				newEvents.addAll(Engine.LIST_OF_NODES.get(nodeID).endOfSyncedReception(this.getTransmission(), Engine.LIST_OF_NODES.get(nodeID)));
 				break;
-			case "TRY_TO_START_TRANSMISSION":
-				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: TRY_TO_START_TRANSMISSION, ID: "+metadata);
+			case "START_ADVERTISING_EVENT":
+				if (Helper.DEBUG_EVENTS && (type!="START_ADVERTISING_EVENT" || Helper.DEBUG_ADVERTISING_EVENT))
+					System.out.println("EVENT: START_ADVERTISING_EVENT, ID: "+metadata);
 				nodeID=Byte.valueOf(metadata);
-				Event e=Engine.LIST_OF_NODES.get(nodeID).tryToStartTransmission();
+				newEvents.addAll(Engine.LIST_OF_NODES.get(nodeID).startAdvertisingEvent());
+				break;	
+			case "END_OF_ADVERTISING_EVENT": //the event does not trigger new events
+				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: END_OF_ADVERTISING_EVENT,\t ID: "+metadata);
+				nodeID=Byte.valueOf(metadata);	
+				Engine.LIST_OF_NODES.get(nodeID).endOfAdvertisingEvent();
+				break;
+			case "START_TRANSMISSION":
+				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: START_TRANSMISSION, ID: "+metadata+ ", channel: "+this.getTransmission().channel);
+				nodeID=Byte.valueOf(metadata);				
+				Event e=Engine.LIST_OF_NODES.get(nodeID).startTransmission(this.getTransmission());
 				newEvents.add(e);
-				if (e.type.equals("END_OF_TRANSMISSION")){			//if successfully started <- end of the transmission scheduled					
-					for (Node n : Engine.LIST_OF_NODES){				//all other nodes (that are able to receive) start receiving
-						if (n.ID!=nodeID && n.isAbleToReceive()) newEvents.add(n.startReceiving(Engine.LIST_OF_NODES.get(nodeID).currentTransmission));
-					}
+				for (Node n : Engine.LIST_OF_NODES){				//all other nodes start receiving 
+					//when a node is idle - tries to sync, when is synced, then updates noise lvl
+					if (n.ID!=nodeID) newEvents.add(n.startReceiving(Engine.LIST_OF_NODES.get(nodeID).currentTransmission));
 				}				
 				break;		
-			case "END_OF_TRANSMISSION":
+			case "END_OF_TRANSMISSION":  //the event does not create any new events
 				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: END_OF_TRANSMISSION,\t ID: "+metadata);
 				nodeID=Byte.valueOf(metadata);
-				newEvents.add(Engine.LIST_OF_NODES.get(nodeID).endOfTransmission());	
-				break;				
+				Engine.LIST_OF_NODES.get(nodeID).endOfTransmission();	
+				break;	
+			case "TRY_TO_SWITCH_CHANNEL":  
+				if (Helper.DEBUG_EVENTS && (type!="TRY_TO_SWITCH_CHANNEL" || Helper.DEBUG_SWITCH_CHANNEL)) 
+					System.out.println("EVENT: TRY_TO_SWITCH_CHANNEL,\t ID: "+metadata);
+				nodeID=Byte.valueOf(metadata);
+				Event e1=Engine.LIST_OF_NODES.get(nodeID).tryToSwitchChannel();	
+				newEvents.add(e1);
+				break;
 			case "PACKET_GENERATION":
 				if (Helper.DEBUG_EVENTS) System.out.println("EVENT: PACKET_GENERATION,\t ID: \t"+metadata);
 				nodeID=Byte.valueOf(metadata);
 				//this Event triggers one or two Events, so we need to use addAll. 
 				//generatePacket() returns an ArrayList of Events
-				newEvents.addAll(Engine.LIST_OF_NODES.get(nodeID).generatePacket());
+				newEvents.add(Engine.LIST_OF_NODES.get(nodeID).generatePacket());
 				break;
 				/**
 				 * TODO: Some logic needed. For now, node goes to sleep for 305s. The value should be taken from a packet with this request. 
@@ -130,4 +150,35 @@ class Event {
 		newEvents.removeAll(Collections.singleton(null));   //remove all "null" events
 		return newEvents;
 	}
+}
+/**
+ * End of transmission event. It inherits from Event (Transmission object added).
+ * After end of transmission the transmitted packet can be obtained from the transmission object.
+ */
+class EventEndTrans extends Event{
+		Transmission transmission;
+		public EventEndTrans(double d, String type_, String metadata_, Transmission trans_) {
+			super(d, type_, metadata_);
+			transmission=trans_;
+		}
+		/**
+		 * Only transmission events (EventStartTrans/EventEndTrans object) has a Transmission object
+		 */
+		Transmission getTransmission(){return transmission;} 	
+}
+
+/**
+ * End of transmission event. It inherits from Event (Transmission object added).
+ * After end of transmission the transmitted packet can be obtained from the transmission object.
+ */
+class EventStartTrans extends Event{
+		Transmission transmission;
+		public EventStartTrans(double d, String type_, String metadata_, Transmission trans_) {
+			super(d, type_, metadata_);
+			transmission=trans_;
+		}
+		/**
+		 * Only transmission events (EventStartTrans/EventEndTrans object) has a Transmission object
+		 */
+		Transmission getTransmission(){return transmission;} 	
 }

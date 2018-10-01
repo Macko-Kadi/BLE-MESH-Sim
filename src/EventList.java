@@ -35,7 +35,7 @@ class EventList {
 	/**
 	 * The function is helpful for Engine object. First event time is current simulation time. 
 	 */
-	float getFirstEventStartTime(){
+	double getFirstEventStartTime(){
 		return theList.get(0).startTime;
 	}
 	/**
@@ -64,27 +64,27 @@ class EventList {
 	 * 
 	 * @return position in the event list where to place the event 
 	 */
-	 int binarySearch(float value){
+	 int binarySearch(double startTime){
 		if (theList.size()==0) return 0; //When there is nothing in the list, the place is equal to 0;
 		//When something in the list:	 
 		int firstIndex=0;
 		int lastIndex=theList.size()-1;			
 		while (true){ 										//Repeat until 2 consecutive indexes are founded (index, index+1) or (index, index)
 			int midIndex=(firstIndex+lastIndex)/2;			//get the midIndex of your current indexes range
-			if (theList.get(midIndex).startTime>value){		//if the value at the midIndex is greater than your value, your value position will be not greater than the midIndex
+			if (theList.get(midIndex).startTime>startTime){		//if the value at the midIndex is greater than your value, your value position will be not greater than the midIndex
 				lastIndex=midIndex;								
 			}
-			if (theList.get(midIndex).startTime<=value){	//if the value at the midIndex is not greater than your value, your value position will be not smaller than the midIndex
+			if (theList.get(midIndex).startTime<=startTime){	//if the value at the midIndex is not greater than your value, your value position will be not smaller than the midIndex
 				firstIndex=midIndex;
 			}
 			if (lastIndex<=firstIndex+1){						//if you have 2 consecutive indexes
-				if (value>theList.get(lastIndex).startTime){	//if your value is greater than lastIndex 
+				if (startTime>theList.get(lastIndex).startTime){	//if your value is greater than lastIndex 
 					//(it's only possible when the value should take the last place at the list - so below error just for sure)
 					if (lastIndex!=theList.size()-1) System.out.println("ERROR: binary search - you shouldn't see that. It should be only possible when lastIndex == theList.size()-1 ");
 					//put the value at the last place of the list
 					return lastIndex+1;
 				}
-				else if (value<theList.get(firstIndex).startTime){ 	//if your value is smaller than firstIndex
+				else if (startTime<theList.get(firstIndex).startTime){ 	//if your value is smaller than firstIndex
 					//(it's only possible when the value should take the first place at the list - so below error just for sure)
 					if (firstIndex!=0) System.out.println("ERROR: binary search - you shouldn't see that. It should be only possible when firstIndex == 0 ");
 					//put the value at the first place of the list

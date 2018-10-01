@@ -37,6 +37,22 @@ class Node {
 	 */
 	static final float INTERFACE_SPEED=1000000f; 
 	/**
+	 * According to NOTES BLE - Advertising Events are scheduled with a gap equal to (const)advInterval+(random)advDelay 
+	 * advInterval varies from 20ms to 10s (can be adjusted)
+	 * in the nordic implementation it is set to 3ms, same here
+	 */
+	static final float ADV_INTERVAL=0.02f;
+	/**
+	 * According to NOTES BLE - Advertising Events are scheduled with a gap equal to (const)advInterval+(random)advDelay 
+	 * advDelay is in the range of 0 to 10 ms, k*ADV_INTERVAL_SLOT, where k=0:16, ADV_INTERVAL_SLOT=0.625ms=0.000625s
+	 */
+	static final float ADV_INTERVAL_SLOT=0.000625f;
+	
+	/**
+	 * Time of scanning of one channel
+	 */
+	static final float SCAN_WINDOW_TIME=0.010f; //10 ms
+	/**
 	 * <pre>
 	 * We will use dBm as a power unit. Typically (?), for BLE 1Mbit/s, 10mW=10dBm is used.
 	 * TODO: confirm the value
@@ -103,20 +119,14 @@ class Node {
 	 * 
 	 * If you want to change maxTransmissionPower into currentTransmissionPower - you will need to periodically update the inStateEnergyConsumption array (since float is not mutable)
 	 * 
-	 * States: [turned off , transmitting, idle, sleep, deep sleep, ?]
+	 * States: [turned off , transmitting, idle/tx_prep, sleep, deep sleep, ?]
 	 * 
 	 * TODO: Check the values and define required dependencies (if there are any (?)).
 	 * 
 	 * </pre>
 	 */
-	private static final float[] IN_STATE_ENERGY_CONSUMPTION={0,MAX_TRANSMISSION_POWER+0.1f,0.1f, 0.001f, 0.0001f, 0.0f};	//in mW	
-	/**
-	 * Maximum backoff time that may be generated 
-	 * 
-	 * TODO: Is the value realistic ?
-	 * TODO: Should we use a BackoffCounter object instead ?
-	 */
-	private static final float MAX_BACKOFF_TIME=0.1f; //seconds
+	private static final float[] IN_STATE_ENERGY_CONSUMPTION={0,MAX_TRANSMISSION_POWER+0.1f, 0.1f, 0.001f, 0.0001f, 0.0f};	//in mW	
+
 	 
 //==================================================================================================//
 //================================Node: INSTANCE VARIABLES =========================================//
@@ -149,12 +159,24 @@ class Node {
 	 */
 	ArrayList<Packet> queue=new ArrayList<Packet>();	
 	/**
+	 * current listening channel
+	 */
+	private byte listeningChannel = (byte)0;
+	/**
+	 * When a node is in SYNC state the scanning channel can't switch.
+	 * The channel switching will be done just after END_OF_SYNCED_RECEPTION event
+	 * This is the flag determining whether to switch channel after the event;
+	 */
+	private boolean isItSwitchingTime = false;
+	/**
 	 * <pre>
 	 * A node can be in various states:
 	 * 
 	 * TURNED_OFF: 		discharged - does not do anything 
 	 * TRANSMITTING:	can't synchronize to new transmission
-	 * IDLE:			can do anything
+	 * TX_PREP:			can't synchronize to new transmission - radio adjusting  
+	 * IDLE:			can do everything
+	 * SYNC:			node is synced to a transmission - can't do nothing until the transmission ends
 	 * SLEEP:			same as TURNED_OFF but a node goes sleep for a specified time, then goes IDLE
 	 * DEEP_SLEEP:		sleep with no accurate clock - same as sleep, but sleeps for +- specified time
 	 * ???
@@ -168,27 +190,6 @@ class Node {
 	 * </pre>
 	 */	
 	private String nodeState="IDLE";
-	/**
-	 * <pre>
-	 * Physical layer can be in 5 states:
-	 * 
-	 * From YANS
-	 * TX: 			the PHY is currently transmitting a signal on behalf of its associated MAC
-	 * SYNC: 		the PHY is synchronized on a signal and is waiting until it has received its last bit to forward it to the MAC
-	 * IDLE: 	 	the PHY is not in the TX or SYNC states and the energy measured on the medium is LOWER than Energy Detection Threshold (ENERGY_DETECTION_THRESHOLD)
-	 * CCA_BUSY: 	the PHY is not in the TX or SYNC states but the energy measured on the medium is HIGHER than Energy Detection Threshold (ENERGY_DETECTION_THRESHOLD)
-	 * NONE:		node is turned off/sleep	
-	 * 
-	 * Or in another words:
-	 * TX: 			sending
-	 * SYNC: 		receiving
-	 * IDLE:		idle, can start transmission - noise level is low (no other transmissions or transmissions far away)
-	 * CCA_BUSY:	idle, can't start transmission - noise level is high (sum of other transmissions power is too high to start transmission)
-	 * NONE			node is turned off/sleep	
-	 * </pre>
-	 * @see Node#ENERGY_DETECTION_THRESHOLD
-	 */
-	private String phyState="IDLE";
 	/**
 	 * The object represents currently synced transmission and their parameters (encapsulated in Reception object)
 	 * It is null if there is no currently synced reception
@@ -215,15 +216,16 @@ class Node {
 	 */
 	private PacketsSource packetsSource;
 	
-	public static int packetCount=0;
+	public static int sentPacketCount=0;         //number of sent packets
+	public static int generatedPacketCount=0;    //number of generated packets
 	public static int packetReceivedCount=0;
 	public static int retransmit=0;
 	public static ArrayList<String> duplicateList = new ArrayList<String>();
 	public static int duplicateCounter;
 	public static int collisionCounter;
 	public static int noCollisionCounter;
-	public static Map<String, Float> timeOfPacketGeneration = new HashMap<String, Float>();
-	public static Map<String,Float> timeOfPacketReception=new HashMap<String, Float>();
+	public static Map<String, Double> timeOfPacketGeneration = new HashMap<String, Double>();
+	public static Map<String,Double> timeOfPacketReception=new HashMap<String, Double>();
 
 //	I've decided to make it very simple so I don't use the BackoffCounter object at the moment
 //	/**
@@ -251,90 +253,163 @@ class Node {
 //======================================Node: METHODS ==============================================//
 //==================================================================================================//
 	/**
-	 * Tries to start a transmission. 
-	 * @return If success schedules END_OF_TRANSMISSION, otherwise starts another backoff procedure (so schedules TRY_TO_START_TRANSMISSION)
+	 * Tries to start a transmission procedure. 
+	 * @return Next START_ADVERTISING_EVENT, and if is able to transmit schedules 3x START_TRANSMISSION and END_OF_ADVERTISING_EVENT events,
+	 * If there is nothing to send or nodeState is not equal to IDLE (e.g. TURNED_OFF)
 	 */
-	Event tryToStartTransmission(){			
-		if(Helper.DEBUG_TRANS) System.out.println("Node "+ID+" queue size: "+ queue.size());
-		if(isAbleToTransmit()){						//if the node is able to transmit  (checks its phyState, nodeState, noise lvl, queueOccupancy)
-			if (Helper.DEBUG_TRANS) System.out.println("Node "+ID+" is ableToTransmit");
-			currentTransmission=new Transmission(this,getFirstPacketFromQueue());	//transmit first packet from the queue
-			phyState="TX";   
-			nodeStateChange("TRANSMITTING");							
-			Medium.addCurrentTransmission(currentTransmission);					//give transmission to the Medium 
-			return new Event(Engine.simTime+currentTransmission.duration,"END_OF_TRANSMISSION", Byte.toString(ID));	//schedule the end of transmission 
+	ArrayList<Event> startAdvertisingEvent(){		
+		ArrayList<Event> list = new ArrayList<Event>();
+		if(isAbleToTransmit()){						//if the node is able to transmit  (checks nodeState, queueOccupancy)
+			list.addAll(startTransmissionProcedure()); //add 3x START_TRANSMISSION event and END_OF_ADVERTISING_EVENT
 		}
-		else{ //if can't start transmission - start backoff again
-			return startBackoffProcedure();
-			
-		}
+		//schedule next Advertising Event
+		list.add(scheduleAdvertisingEvent()); 		
+		return list;
+	}
+	/**
+	 * The procedure looks as follows:
+	 * 1.6 ms   setting up,  nodeState=TX_PREP 
+	 *   x ms   starting transmission - channel 0 (37), nodeState=TX
+	 * 0.8 ms   setting up,  nodeState=TX_PREP
+	 *   x ms   starting transmission - channel 1 (38), nodeState=TX
+	 * 0.8 ms   setting up,  nodeState=TX_PREP
+	 *   x ms   starting transmission - channel 2 (39), nodeState=TX
+	 * 0.3 ms   post processing,  nodeState=TX_PREP
+	 */
+	ArrayList<Event> startTransmissionProcedure(){
+		ArrayList<Event> list = new ArrayList<Event>();
+		Packet P=getFirstPacketFromQueue();
+		//create 3 tranmission objects - each on different channel
+		Transmission t1=new Transmission(this, P, (byte)0);
+		Transmission t2=new Transmission(this, P, (byte)1);
+		Transmission t3=new Transmission(this, P, (byte)2);
+		//the procedure
+		nodeStateChange("TX_PREP");
+		float transmissionTime=t1.duration;
+		list.add(scheduleTransmissionEvent(Engine.simTime+0.0016,t1));
+		list.add(scheduleTransmissionEvent(Engine.simTime+0.0024+transmissionTime,t2));
+		list.add(scheduleTransmissionEvent(Engine.simTime+0.0032+2*transmissionTime,t3));
+		list.add(scheduleEndOfAdvertisingEvent(Engine.simTime+0.0035+3*transmissionTime));
+		// todo
+		return list;		
+	}
+	Event scheduleEndOfAdvertisingEvent(double d){
+		return new Event(d,"END_OF_ADVERTISING_EVENT",Byte.toString(ID));
+	}
+	/**
+	 * End of Advertising Event.
+	 * just change nodeState
+	 */
+	void endOfAdvertisingEvent(){	 
+		nodeStateChange("IDLE"); 
+	}
+	Event scheduleTransmissionEvent(double d, Transmission t){
+		return new EventStartTrans(d,"START_TRANSMISSION",Byte.toString(ID), t);
+	}
+	/**
+	 * Starts a transmission (there will be 3 transmissions within one advertising event
+	 * @param t
+	 * @return END_OF_TRANSMISSION event
+	 */
+	Event startTransmission(Transmission t){
+		sentPacketCount++;
+		currentTransmission=t;	
+		nodeStateChange("TRANSMITTING");							
+		Medium.addCurrentTransmission(currentTransmission);					//give transmission to the Medium 			
+		return new Event(Engine.simTime+currentTransmission.duration,"END_OF_TRANSMISSION", Byte.toString(ID));	//schedule the end of transmission 	
 	}
 	/**
 	 * End of transmission.
-	 * When transmission has ended, if there is something in queue, start backoff procedure
-	 * @return may return scheduled TRY_TO_START_TRANSMISSION event or null
+	 * Remove the current transmission from the air (Medium), change the node state to TX_PREP (the node still is in the Advertising event)
 	 */
-	Event endOfTransmission(){	
-		phyState="IDLE";   
-		nodeStateChange("IDLE"); 
+	void endOfTransmission(){ 
 		Medium.removeCurrentTransmission(currentTransmission);
 		currentTransmission=null;
-		if (isQueueEmpty()) return null;
-		else{
-			retransmit++;
-			return startBackoffProcedure();
-		}
+		nodeStateChange("TX_PREP");
 	}
 	/**
+	 * For some statistics
+	 */
+	static ArrayList<Packet> packetList = new ArrayList<Packet>();
+	/**
 	 * <pre>
-	 * Packet generation may trigger two Events: 
-	 * 1) It always generate NEXT_PACKET_GEN Event, and
-	 * 2) addPacketToQueue, if queue was empty, Start backoff procedure, TRY_TO_START_TRANSMISSION
+	 * Packet generation always triggers NEXT_PACKET_GEN Event
 	 * 
 	 * ArrayList of Events is used instead of EventList - I don't need to sort events in this list - they need to be sorted anyway later.
 	 * </pre>
 	 */
-	static ArrayList<Packet> packetList = new ArrayList<Packet>();
-	ArrayList<Event> generatePacket(){
-		ArrayList<Event> list = new ArrayList<Event>();
-		Packet p=packetsSource.createPacket(this);
-		if(Helper.DEBUG_TRANS) System.out.println("Generated packet ID: " +p.header.packetID);	
-		packetList.add(p);
-		list.add(new Event (packetsSource.timeOfNextGen,"PACKET_GENERATION", Byte.toString(ID)));		
+	Event generatePacket(){
+		Packet p=packetsSource.createPacket(this);					
 		addPacketToCache(p);							//all generated packets need to be cached 
-		list.add(addPacketToQueue(p));					//add packet to the queue (it may trigger event)
-		list.removeAll(Collections.singleton(null)); 	//remove all nulls from the list
-		packetCount++;
-		timeOfPacketGeneration.put(p.header.packetID,Engine.simTime);
-		return list;
+		addPacketToQueue(p);	
+		if(Helper.DEBUG_TRANS) System.out.println("Generated packet ID: " +p.header.packetID + " queue state: " + queue.size());	
+		//statistics block
+		packetList.add(p);
+		generatedPacketCount++;
+		timeOfPacketGeneration.put(p.header.packetID,Engine.simTime);	
+		//schedule next
+		return new Event (packetsSource.timeOfNextGen,"PACKET_GENERATION", Byte.toString(ID));
 	}
 	/**
 	 * <pre>
-	 * Adds packet to the queue. If the queue was empty and the node is not transmitting, start backoff procedure, ohterwise do nothing.
-	 * Why need to check phyState!=TX? You add a packet to the queue after its successful reception OR after its generation - it may be generated during transmission.
+	 * Adds a packet to the queue. 
 	 * </pre>
 	 * @param p
-	 * @return scheduled TRY_TO_START_TRANSMISSION event or null
 	 */
-	Event addPacketToQueue(Packet p){	
+	void addPacketToQueue(Packet p){	
 		queue.add(p);
-		if(queue.size()==1 && !phyState.equals("TX"))return startBackoffProcedure();
+	}
+	/**
+	 * <pre>
+	 * Actually it schedules TRY_TO_START_ADVERTISING_EVENT event. That's it.
+	 * The event is triggered after ADV_INTERVAL + k*ADV_INTERVAL_SLOT
+	 * where kis random and k=0,1,...,16
+	 * </pre>
+	 * @return scheduled TRY_TO_START_ADVERTISING_EVENT event;
+	 */
+	Event scheduleAdvertisingEvent(){
+		int k=Helper.generator.nextInt(17); //generate number from 0 to 16 //something wrong I guess... it gives 17 possible states (can't be done with 4 bits counter)
+	 	float interval=ADV_INTERVAL+k*ADV_INTERVAL_SLOT;
+		return new Event(Engine.simTime+interval,"START_ADVERTISING_EVENT",Byte.toString(ID));
+	}
+	
+	Event scheduleTryToSwitchChannelEvent(){		
+		return new Event(Engine.simTime+SCAN_WINDOW_TIME,"TRY_TO_SWITCH_CHANNEL",Byte.toString(ID));
+	}
+	/**
+	 * sets listening channel
+	 * @param channel_
+	 */
+	void setListeningChannel(byte channel_){
+		listeningChannel=channel_;
+	}
+	/**
+	 * @return listeningChannel
+	 */
+	byte getListeningChannel(){
+		return listeningChannel;
+	}
+	Event tryToSwitchChannel(){
+		//change channel when the node is IDLE or transmitting
+		if(nodeState!="SYNC" && nodeState!="TURNED_OFF" && nodeState!="SLEEP" && nodeState!="DEEP_SLEEP"){
+			return switchListeningChannel();
+		}
+		//if the node is currently synced - wait until end of receiving (try to switch channel in 0.5 ms)
+		else if (nodeState=="SYNC")	{
+			if(Helper.DEBUG_SWITCH_CHANNEL) System.out.println("Node " +ID + " currently synced to reception - channel switching rescheduled");
+			isItSwitchingTime=true;
+			return null;
+		}
 		else return null;
 	}
 	/**
-	 * <pre>
-	 * I've decided to make it very simple at the moment so I don't use BackoffCounter object and any logic.
-	 * Actually it schedules TRY_TO_START_TRANSMISSION event. That's it.
-	 * </pre>
-	 * @return scheduled TRY_TO_START_TRANSMISSION event;
+	 * start listening to next channel
 	 */
-	Event startBackoffProcedure(){
-	/* 
-	 *	backoffCounter=new BackoffCounter();
-	 *	return new Event(backoffCounter.getTimeOfProcedureEnd(),"TRY_TO_START_TRANSMISSION",Byte.toString(ID));
-	 */	
-		return new Event(Engine.simTime+Helper.generator.nextFloat()*MAX_BACKOFF_TIME,"TRY_TO_START_TRANSMISSION",Byte.toString(ID));
-	}	
+	Event switchListeningChannel(){
+		listeningChannel=(byte)((listeningChannel+1)%3);
+		if(Helper.DEBUG_SWITCH_CHANNEL) System.out.println("Node " +ID + " switches scanning channel to " + listeningChannel);
+		return scheduleTryToSwitchChannelEvent();
+	}
 	/**
 	 * Node goes to sleep for a given time
 	 * 
@@ -343,21 +418,27 @@ class Node {
 	 */
 	Event goSleep(float duration){
 		if(Helper.DEBUG_STATE) System.out.println("Node "+ID +" goes to sleep for " + duration +" seconds");
-		phyState="NONE";
 		nodeStateChange("SLEEP");
 		return (new Event(Engine.simTime+duration,"WAKE_UP",Byte.toString(ID))); 
 	}
 	/**
-	 * TODO: Specify, how a node behaves after waking up. I've assumed that it generates a packet - it will start a chain of other events (transmission and generation of another packet)
+	 * TODO: Specify, how a node behaves after waking up. I've assumed that it generates a packet - it will start a chain of next generations. Same with  START_ADVERTISING_EVENT
 	 * 
-	 * @return list of events generated by generatePacket() function
+	 * 
+	 * @return list of events consisitng of two events: PACKET_GENERATION and START_ADVERTISING_EVENT
 	 * @see Node#generatePacket()
 	 */
 	ArrayList<Event> wakeUp(){
 		if(Helper.DEBUG_STATE) System.out.println("Node "+ID +" wakes up");
-		phyState="IDLE";
 		nodeStateChange("IDLE");
-		return generatePacket();			
+		//generate events and put them in the list
+		Event e1=generatePacket();
+		Event e2=scheduleAdvertisingEvent();
+		ArrayList<Event> list=new ArrayList<Event>();
+		list.add(e1);
+		list.add(e2);
+		
+		return list;			
 	}
 	/**
 	 * If packet already cached - do nothing. Otherwise:
@@ -366,53 +447,64 @@ class Node {
 	 * @param p 
 	 */
 	private Event processPacket(Packet p, Node n){	
+		Event e=null;
+		if(isNodeDestination(p)){
+			if (Helper.DEBUG_CACHE) System.out.println("THE NODE IS PACKET DESTINATION!");
+		}
 		if(!cache.isThePacketInCache(p)){  					//if it is the first time when the node received the packet 
 			p.header.TTL = (byte) (p.header.TTL-1);
 			System.out.println("TTL: "+ p.header.TTL);
 			addPacketToCache(p);								//add the packet to the cache, and
 			if (isNodeDestination(p)){							//1) if the node is packet destination
-				performPacketActions(p); 							//perform actions defined in packet, 
-				return null;										//then do nothing	
+				e=performPacketActions(p); 							//perform actions defined in packet, 
 			}
 			else if (doesNodeBelongToDestinationGroup(p)){		//2) if the node belongs to a destination group 
-				performPacketActions(p);							//perform actions defined in packet 
+				e=performPacketActions(p);						//perform actions defined in packet 
 				if (Provisioner.isNodeRelay(n)) {
-				return addPacketToQueue(p);	}						//and then send* it to other nodes - the packet must reach all the group members. *(I meant, add it to the queue, of course)			
+					addPacketToQueue(p);						//the packet must reach all the group members. If the node is a relay, add the packet to queue
+				}									
 			}
-			else 
-				if (Provisioner.isNodeRelay(n)) {
-					return addPacketToQueue(p);}					//3) if not 1) or 2) -> send* it to other nodes. *(I meant, add it to the queue, of course)
+			else if (Provisioner.isNodeRelay(n)) {   			//3) if not 1) or 2) -> Do not perform action defined in packet. If the node is a relay, add the packet to queue 
+					addPacketToQueue(p);
+				}					
+			}
+		//if the packet was cached already
+		else if(isNodeDestination(p)){  //if the node was destination of the packet - collect some statistics
+			duplicateList.add(p.header.packetID);
+			duplicateCounter++;
+			if (Helper.DEBUG_CACHE) System.out.println("The packet " + p.header.packetID+ " was cached already! DROP!");
 		}
-		else if(Helper.DEBUG_CACHE) 
-			{System.out.println("The packet " + p.header.packetID+ " was cached already !");
-			if (isNodeDestination(p)){
-				duplicateList.add(p.header.packetID);
-				duplicateCounter++;
-			}
-			}
-		return null; 										//if the packet was cached already - do nothing (
+		else if (Helper.DEBUG_CACHE) System.out.println("The packet " + p.header.packetID+ " was cached already! DROP!");
+		return e;
 	}	
 	/* <pre>
 	 * When a transmission start other nodes will start receiving it (the transmission is hidden in the reception object).
 	 * They may SYNC to the transmission (and the reception becomes a syncedReception), or the transmission will be treated as a part of noise (in Medium class)
+	 * If the transmission does not correspond to node's current listening channel - just ignore the transmission.
 	 * </pre>
 	 * @param T transmission a node starts to receive 
 	 */
-	Event startReceiving(Transmission t){	
-		if (phyState.equals("SYNC")){				//if the node is currently synced to another transmission 
-			if(Helper.DEBUG_RCV) System.out.println("Track noise lvl for reception of packet: "+syncedReception.transmission.packet.header.packetID);
-			syncedReception.trackNoiseLvl(0f);		//update noise lvl of the synced receiving transmission
-		}		
-		else if (isAbleToSync()){		 			//if the not is not currently synced and the node can sync to the receiving transmission	
-			if(Helper.DEBUG_RCV) System.out.println("Node "+ID +" is able to sync, phyState" + phyState);		
-			Reception reception=new Reception(t);	//Encapsulate the transmission in the Reception object		
-			if (reception.isTheSyncSuccessfull()){				//if successfully synced
-				phyState="SYNC";					//change phyState to SYNC
-				if (Helper.DEBUG_RCV) System.out.println("Node "+ID +" synced, phyState: " + phyState);
-				syncedReception=reception;			//set that the reception is the synced one
-				return new EventEndTrans(Engine.simTime+reception.transmission.duration,"END_OF_SYNCED_RECEPTION", Byte.toString(ID),t);
+	Event startReceiving(Transmission t){
+		if(listeningChannel==t.channel){   //if transmission is visible to a node (listenning channel corresponds to transmission channel)
+			if (nodeState.equals("SYNC")){				//if the node is currently synced to another transmission 
+				if(Helper.DEBUG_RCV) System.out.println("Track noise lvl for reception of packet: "+syncedReception.transmission.packet.header.packetID);
+				syncedReception.trackNoiseLvl(0f);		//update noise lvl of the synced receiving transmission
+			}		
+			else if (nodeState.equals("IDLE")){		 	//if the node is currently idle	
+				if(Helper.DEBUG_RCV) System.out.println("Node "+ID +" is able to sync, nodeState" + nodeState);	
+				Reception reception=new Reception(t);	//Encapsulate the transmission in the Reception object	
+				//try to sync
+				if (reception.isTheSyncSuccessfull()){				//if successfully synced
+					if(Helper.DEBUG_RCV) System.out.println("SYNC SUCCESSFULL!");
+					nodeStateChange("SYNC");				//change nodeState to SYNC
+					if (Helper.DEBUG_RCV) System.out.println("Node "+ID +" current nodeState: " + nodeState);
+					syncedReception=reception;			//set that the reception is the synced one
+					return new EventEndTrans(Engine.simTime+reception.transmission.duration,"END_OF_SYNCED_RECEPTION", Byte.toString(ID),t);
+				}
+				if(Helper.DEBUG_RCV) System.out.println("SYNC FAILED!");
 			}
-		}		
+		}
+		else if(Helper.DEBUG_RCV) System.out.println("NODE " + ID + " is listening on channel: " + getListeningChannel());
 		/*
 		 *Since there are no actions related with END_OF_NON_SYNCED_RECEPTION I've decided to remove the event
 		 *Thanks to that, the Engine.eventList is shorter (so, it's easier to sort and so on) 
@@ -427,26 +519,36 @@ class Node {
 	 * Details in the source code comments.
 	 *</pre>
 	 */
-	Event endOfSyncedReception(Transmission t, Node n){
-		phyState="IDLE"; 													//phyState changes from SYNC to IDLE
+	ArrayList<Event> endOfSyncedReception(Transmission t, Node n){
+		nodeStateChange("IDLE"); 													//nodeState changes from SYNC to IDLE
+		ArrayList<Event> eList=new ArrayList<Event>();
 		if(syncedReception.isTheReceptionSuccessfull()){					//if the transmission is successfully received
-			Event e=processPacket(syncedReception.transmission.packet, n);			//process the packet obtained from the received transmission (it generates an event)
-			if (Helper.DEBUG_RCV) System.out.println("Node " + ID+" SUCCESSFULL RECEPTION ! Process Packet");//													|
+			if (Helper.DEBUG_RCV) System.out.println("RECEPTION SUCCESSFULL! Processing Packet...");
+			eList.add(processPacket(syncedReception.transmission.packet, n));			//process the packet obtained from the received transmission (it can generate an event)			
 			noCollisionCounter++;
-			syncedReception=null;												//there is no synced reception at the moment									|									
-			return e;															//return the event <-------------------------------------------------------------
+			syncedReception=null;//there is no synced reception at the moment									|									
+			if (isItSwitchingTime){
+				eList.add(switchListeningChannel());
+				isItSwitchingTime=false;
+			}
+			return eList;															//return the event <-------------------------------------------------------------
 		}
 		else {																//if the transmission is NOT successfully received
 			collisionCounter++;
+			if (Helper.DEBUG_RCV) System.out.println("RECEPTION FAILED! - PROBABLY COLLISION!");//
 			syncedReception=null;												//there is no synced reception at the moment
-			return null;														//do nothing
+			if (isItSwitchingTime){
+				eList.add(switchListeningChannel());
+				isItSwitchingTime=false;
+			}
+			return eList;														//do nothing
 		}			
 	}
 	/**
 	 * TODO: Actions related with packet performing eg. nodeStateChange (the ProvisionerNode (?) may send a goToSleep request)
 	 * @param p
 	 */
-	private void performPacketActions(Packet p){
+	private Event performPacketActions(Packet p){
 		if(Helper.DEBUG_RCV) System.out.println("Packet "+p.header.packetID+" successfully received and processed in node: " +ID);
 		packetReceivedCount++;
 		timeOfPacketReception.put(p.header.packetID, Engine.simTime);
@@ -455,6 +557,8 @@ class Node {
 		/**
 		 * TODO: all logic needed !
 		 */
+		//for now - return null event
+		return null;
 	}
 	/**
 	 * <pre>
@@ -475,7 +579,8 @@ class Node {
 	 * </pre>
 	 */
 	void updateTransmissionPower(){
-		if (batteryPowered) drainBattery();		
+		if (batteryPowered) drainBattery();
+		if (Helper.SIMPLE_SNR) return; //when the flag is set, always send packets with the same power
 		currentTransmissionPower=(float)(Math.min(MAX_TRANSMISSION_POWER, MAX_TRANSMISSION_POWER-6*(0.5-battery.energyLevel/100)));
 	}
 	/**
@@ -495,7 +600,6 @@ class Node {
 	void switchOff(){
 		System.out.println("Node "+ID+" discharged ! Turning off...");
 		nodeStateChange("TURNED_OFF");
-		phyState=("NONE");
 	}
 	/**
 	 * Whether packet is destinated for the node
@@ -505,41 +609,15 @@ class Node {
 	 * Whether packet is destinated for the group the node belongs to
 	 */
 	private boolean doesNodeBelongToDestinationGroup(Packet p){	return (groupIDs.contains(p.header.destinationID));}
-	private boolean isQueueEmpty(){return (queue.size()==0);}
 	/**
-	 * The node can receive a transmission only when it is turned on (thus nodeState == IDLE or TRANSMITTING) 
-	 */
-	boolean isAbleToReceive() {
-		return (nodeState.equals("IDLE") || nodeState.equals("TRANSMITTING"));
-	}
-	/**
-	 * Checks if a node is able to sync, node is idle and (phyState is IDLE or CCA)	
-	 */
-	private boolean isAbleToSync() {
-		return (nodeState.equals("IDLE") && (phyState.equals("IDLE") || phyState.equals("CCA_BUSY")));
-	}
-	/**
-	 * Checks if a node is able to transmit: node is IDLE, phyState is IDLE, there is something to send  	
+	 * Checks if a node is able to transmit: node is IDLE and there is something to send  	
 	 */
 	private boolean isAbleToTransmit(){			
-		determinePhyState(); 				//updates phyState. Actually determine whether it is IDLE or CCA_BUSY state
-		if(Helper.DEBUG_TRANS) System.out.println("Node "+ID+" phyState "+ phyState);
-		return (nodeState.equals("IDLE") && phyState.equals("IDLE") && queue.size()>0); 	
+		boolean decision=(nodeState.equals("IDLE")  && queue.size()>0); //node is idle and there is something to send
+		if(Helper.DEBUG_TRANS) System.out.println("isAbleToTransmit(): Node "+ID+" nodeState "+ nodeState +", queue size: " + queue.size() +" -> " +decision);
+		return (decision); 	
 	}
-	/**
-	 * If phyState == IDLE or CCA_BUSY - compares noise lvl with ENERGY_DETECTION_THRESHOLD and sets phyState to IDLE or CCA_BUSY 
-	 */
-	private void determinePhyState(){
-		//if TX, SYNC, NONE - do nothing
-		if (phyState.equals("TX")) return;
-		if (phyState.equals("NONE")) return;
-		if (phyState.equals("SYNC")) return;		
-		float sumOfNoise=Medium.getNoise(ID); 			//get noise seen by this node
-		if(Helper.DEBUG_TRANS) System.out.println("Node "+ID+" isPhyStateIdleOrCCA_BUSY() - sumOfNoise "+ sumOfNoise);
-		if (sumOfNoise<ENERGY_DETECTION_THRESHOLD) phyState="IDLE";
-		else phyState="CCA_BUSY";		
-	}
-	
+
 	/*
 	 *Since there are no actions related with END_OF_NON_SYNCED_RECEPTION I've decided to remove the event, so also the function:
 	 *
@@ -583,6 +661,8 @@ class Node {
 			case ("TURNED_OFF"): return (byte)0;
 			case ("TRANSMITTING"): return (byte)1;
 			case ("IDLE"): return (byte)2;
+			case ("SYNC"): return (byte)2;
+			case ("TX_PREP"): return (byte)2;
 			case ("SLEEP"): return (byte)3;
 			case ("DEEP_SLEEP"): return (byte)4;
 			default : {
@@ -607,7 +687,6 @@ class Node {
 		queue.remove(0);
 		return p;
 	}
-	String getPhyState(){return phyState;}
 	String getNodeState(){return nodeState;}
 	float getCurrentTransmissionPower(){return currentTransmissionPower;}
 	/**
@@ -673,7 +752,7 @@ class Node {
 			 * However, I will leave it as it is, because the startCachingTime may be used for some statistics
 			 * 
 			 */
-			private float startCachingTime; 
+			private double startCachingTime; 
 			private String packetID;
 			CachedPacket(Packet p){
 				startCachingTime=Engine.simTime;
@@ -699,7 +778,7 @@ class Node {
 		private double currentEnergy;		//mWh
 		private double currentEnergytmp;		//mWh
 		private double energyLevel=100.0f; 	//in percents - 100.0 fully charged, 0.0 discharged
-		private float timeOfLastUpdate;		//s
+		private double timeOfLastUpdate;		//s
 		private double usedEnergy1;
 		/**
 		 * <pre>
@@ -789,7 +868,7 @@ class Node {
 		/**
 		 * It will be initialized when type of generator will be set. 
 		 */
-		float timeOfNextGen;						
+		double timeOfNextGen;						
 		/**
 		 * PacketsSource constructor.
 		 * 
@@ -830,7 +909,7 @@ class Node {
 			/**
 			 * TODO: the packet size may vary depends on what's inside
 			 */
-			int packetSize =300;
+			int packetSize =31;
 			/**
 			 * TODO: differ packet receivers
 			 * For now: All packets destination -> nodeID = 1 
@@ -918,18 +997,18 @@ class Node {
 		 *///																									   *|
 		private void trackNoiseLvl(float syncingTransmissionPower){//												| It seems to be easier to get sum of all transmissions powers
 			if(syncingTransmissionPower==0f){//																		| and subtract the power of the currently syncing transmission.
-				if (Helper.DEBUG_NOISE) System.out.println("Node ID "+ID+" trackNoiseLvl "+Medium.getNoise(ID));//	| 
-				noiseDuringTransmission.add(new Noise(Engine.simTime,Medium.getNoise(ID)));//						|
+				if (Helper.DEBUG_NOISE) System.out.println("Node ID "+ID+" trackNoiseLvl "+Medium.getNoise(ID,listeningChannel));//	| 
+				noiseDuringTransmission.add(new Noise(Engine.simTime,Medium.getNoise(ID,listeningChannel)));//						|
 			}//																								------------------------------
 			else{//																							|				|			  |
-				if (Helper.DEBUG_NOISE) System.out.println("Node ID "+ID+" trackNoiseLvl (Syncing) "+Helper.subDBm(Medium.getNoise(ID),receptionPower));
-				noiseDuringTransmission.add(new Noise(Engine.simTime,Helper.subDBm(Medium.getNoise(ID),receptionPower)));							
+				if (Helper.DEBUG_NOISE) System.out.println("Node ID "+ID+" trackNoiseLvl (Syncing) "+Helper.subDBm(Medium.getNoise(ID,listeningChannel),receptionPower));
+				noiseDuringTransmission.add(new Noise(Engine.simTime,Helper.subDBm(Medium.getNoise(ID,listeningChannel),receptionPower)));							
 			}
 		}		 
 		/**
 		 * @return SNR of the Reception
 		 */
-		private float getSNR(){
+		private double getSNR(){
 			 if (Helper.DEBUG_NOISE) System.out.println("getSNR() -> reception power " + receptionPower +" getMaxNoise: "+getMaxNoise());
 			 return receptionPower-getMaxNoise();
 		}
@@ -937,8 +1016,8 @@ class Node {
 		 * The function is helpful for naive approach of SNR calculation. It provides the worst case scenario - maximum noise level that occures during reception
 		 * @return The highest noise lvl occured during receiving period
 		 */
-		private float getMaxNoise(){
-			float maxNoise=Medium.BACKGROUND_NOISE;		//maxNoise can't be lower than background noise
+		private double getMaxNoise(){
+			double maxNoise=Medium.BACKGROUND_NOISE;		//maxNoise can't be lower than background noise
 			for (Noise noise : noiseDuringTransmission){
 				maxNoise=Math.max(maxNoise, noise.currentNoiseLvl);
 			}
@@ -964,7 +1043,7 @@ class Node {
 		  * TODO: How to calculate probability of successfull synchronization ?
 		  */
 		 private float getProbabilityOfSuccessfullSync(){
-			 float SNR=getSNR();
+			 double SNR=getSNR();
 			 if (Helper.DEBUG_NOISE) System.out.println("Node.Transmission.getProbabilityOfSuccessfullSync(), SNR: "+SNR);
 			 if (SNR<MIN_SNR_SYNC_P0) return 0;
 			 else return 1;
@@ -986,7 +1065,7 @@ class Node {
 		  * 
 		  */
 		private float getProbabilityOfSuccessfullReception(){
-			 float SNR=getSNR();
+			 double SNR=getSNR();
 			 if (Helper.DEBUG_NOISE)  System.out.println("Node.Transmission.getProbabilityOfSuccessfullReception(), SNR: "+SNR);
 			 if (SNR<MIN_SNR_RCVD_P0) return 0;
 			 else return 1;
@@ -1008,11 +1087,12 @@ class Node {
 		 * @see Reception#noiseDuringTransmission
 		 */
 		class Noise {
-			private float startTime;		//at the moment, since getMaxNoise() is used to obtain SNR - durations of particular noise periods don't matter
-			private float currentNoiseLvl;
-			Noise(float startTime_, float currentNoiseLvl_){
-				startTime=startTime_;
+			private double startTime;		//at the moment, since getMaxNoise() is used to obtain SNR - durations of particular noise periods don't matter
+			private double currentNoiseLvl;
+			Noise(double simTime, double currentNoiseLvl_){
+				startTime=simTime;
 				currentNoiseLvl=currentNoiseLvl_;
+				if(Helper.SIMPLE_SNR && currentNoiseLvl<Helper.SIMPLE_SNR_TRESHOLD) currentNoiseLvl=-80;
 			}	
 		}
 		
