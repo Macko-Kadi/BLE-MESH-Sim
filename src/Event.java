@@ -1,13 +1,12 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-	//comment added via website - will it syunchronize with my local repository ?
 
 class Event {
 	double startTime;
 	/**
 	
-	 * <pre>
+	 *  
 	 * Type of the event. For now there is a number of defined events:
 	 * PACKET_GENERATION
 	 * TRY_TO_START_TRANSMISSION_PROCEDURE
@@ -20,7 +19,7 @@ class Event {
 	 * BATTERY_CHECK
 	 * BATTERY_DISCHARGED
 	 * 
-	 * </pre>
+	 *  
 	 */
 	String type;
 	/**

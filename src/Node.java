@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <pre>
+ * 
  * The class provides a BLE MESH node
  * 
  * TODO: Role of the node (Roles may change during simulation - so keep it in mind before you use inheritance):
@@ -26,7 +26,7 @@ import java.util.Map;
  * 
  * Some functions are based on the document: Yet Another Network Simulator (auth. Lacage, Henderson), chapter 8.1.
  * I will use YANS abbrevation when refering to the document.
- * </pre>
+ * 
  */
 class Node {
 //==================================================================================================//
@@ -53,14 +53,14 @@ class Node {
 	 */
 	static final float SCAN_WINDOW_TIME=0.010f; //10 ms
 	/**
-	 * <pre>
+	 * 
 	 * We will use dBm as a power unit. Typically (?), for BLE 1Mbit/s, 10mW=10dBm is used.
 	 * TODO: confirm the value
-	 * </pre>
+	 * 
 	 */
 	public static final float MAX_TRANSMISSION_POWER=10;	
 	/**
-	 * <pre>
+	 * 
 	 * ATTENTION: It is important to distinguish synchronization and data reception phases. 
 	 * 
 	 * We should prevent situation when a node synchronizes to a transmission that has no chance to be successfully received.
@@ -72,11 +72,11 @@ class Node {
 	 * If the value should be different for different nodes, remove 'static'.
 	 * 
 	 * TODO: Is the value realistic ? I used these http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
-	 * </pre>
+	 * 
 	 */
 	private static final float MIN_SNR_SYNC_P0=25; 
 	/**
-	 * <pre>
+	 * 
 	 * ATTENTION: It is important to distinguish synchronization and data reception phases. 
 	 * 
 	 * We should prevent situation when a node synchronizes to a transmission that has no chance to be successfully received.
@@ -87,7 +87,7 @@ class Node {
 	 * If the value should be different for different nodes, remove 'static'.
 	 * 
 	 * TODO: Is the value realistic ? I used these http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
-	 *  </pre>
+	 *  
 	 */
 	private static final float MIN_SNR_SYNC_P1=40; 
 	/**
@@ -109,7 +109,7 @@ class Node {
 	 */
 	private static final float MIN_SNR_RCVD_P1=40; 
 	 /**
-	 * <pre>
+	 * 
 	 * I've assumed that during transmission a node consumes maxTransmissionPower, no matter of currentTransmissionPower.
 	 * It means that when battery is discharged, a node transmitt with e.g. 80% of maxTransmissionPower but it still needs maxTransmissionPower to perform the transmission. 
 	 * 
@@ -119,7 +119,7 @@ class Node {
 	 * 
 	 * TODO: Check the values and define required dependencies (if there are any (?)).
 	 * 
-	 * </pre>
+	 * 
 	 */
 	private static final float[] IN_STATE_ENERGY_CONSUMPTION={0,MAX_TRANSMISSION_POWER+0.1f, 0.1f, 0.001f, 0.0001f, 0.0f};	//in mW	
 
@@ -165,7 +165,7 @@ class Node {
 	 */
 	private boolean isItSwitchingTime = false;
 	/**
-	 * <pre>
+	 * 
 	 * A node can be in various states:
 	 * 
 	 * TURNED_OFF: 		discharged - does not do anything 
@@ -183,7 +183,7 @@ class Node {
 	 * TODO: Define possible states and their energy consumption !
 	 * 
 	 * @see Node#IN_STATE_ENERGY_CONSUMPTION inStateEnergyConsumption
-	 * </pre>
+	 * 
 	 */	
 	private String nodeState="IDLE";
 	/**
@@ -323,11 +323,11 @@ class Node {
 	 */
 	static ArrayList<Packet> packetList = new ArrayList<Packet>();
 	/**
-	 * <pre>
+	 * 
 	 * Packet generation always triggers NEXT_PACKET_GEN Event
 	 * 
 	 * ArrayList of Events is used instead of EventList - I don't need to sort events in this list - they need to be sorted anyway later.
-	 * </pre>
+	 * 
 	 */
 	Event generatePacket(){
 		Packet p=packetsSource.createPacket(this);					
@@ -342,20 +342,20 @@ class Node {
 		return new Event (packetsSource.timeOfNextGen,"PACKET_GENERATION", Byte.toString(ID));
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Adds a packet to the queue. 
-	 * </pre>
+	 * 
 	 * @param p
 	 */
 	void addPacketToQueue(Packet p){	
 		queue.add(p);
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Actually it schedules TRY_TO_START_ADVERTISING_EVENT event. That's it.
 	 * The event is triggered after ADV_INTERVAL + k*ADV_INTERVAL_SLOT
 	 * where kis random and k=0,1,...,16
-	 * </pre>
+	 * 
 	 * @return scheduled TRY_TO_START_ADVERTISING_EVENT event;
 	 */
 	Event scheduleAdvertisingEvent(){
@@ -468,11 +468,11 @@ class Node {
 		else if (Helper.DEBUG_CACHE) System.out.println("The packet " + p.header.packetID+ " was cached already! DROP!");
 		return e;
 	}	
-	/* <pre>
+	/* 
 	 * When a transmission start other nodes will start receiving it (the transmission is hidden in the reception object).
 	 * They may SYNC to the transmission (and the reception becomes a syncedReception), or the transmission will be treated as a part of noise (in Medium class)
 	 * If the transmission does not correspond to node's current listening channel - just ignore the transmission.
-	 * </pre>
+	 * 
 	 * @param T transmission a node starts to receive 
 	 */
 	Event startReceiving(Transmission t){
@@ -505,10 +505,10 @@ class Node {
 		return null;
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Actions related with the end of synced reception. Determine whether the packet was successfully received and process the packet.
 	 * Details in the source code comments.
-	 *</pre>
+	 *
 	 */
 	ArrayList<Event> endOfSyncedReception(Transmission t, Node n){
 		nodeStateChange("IDLE"); 													//nodeState changes from SYNC to IDLE
@@ -552,7 +552,7 @@ class Node {
 		return null;
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Updates node currentTransmissionPower based on node state (battery level and (???) so on)
 	 * I've assumed that transmission power corresponds to battery level (in %), however I guess it is not truth - big battery discharged to 30% has still much more energy than fully charged small battery 
 	 * e.g:
@@ -567,17 +567,17 @@ class Node {
 	 * remember that we use dBms - when battery goes to 0, signal is 2 times weaker
 	 * 
 	 * TODO: REALISTIC formula describing relation between node state and transmission power.
-	 * </pre>
+	 * 
 	 */
 	void updateTransmissionPower(){
 		if (Helper.SIMPLE_SNR) return; //when the flag is set, always send packets with the same power
 		currentTransmissionPower=(float)(Math.min(MAX_TRANSMISSION_POWER, MAX_TRANSMISSION_POWER-6*(0.5-battery.energyLevel/100)));
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Changes the nodeState.
 	 * If battery powered, drain the battery.
-	 * </pre>
+	 * 
 	 * @param nodeState_
 	 */
 	private void nodeStateChange(String nodeState_){
@@ -754,12 +754,12 @@ class Node {
 //============================ Node.Battery: CLASS ======================================//
 //=======================================================================================//
 	/**
-	 * <pre>
+	 * 
 	 * The class provides a battery. Different types of batteries may be used. 
 	 * Each battery has a type that corresponds to its initial capacity/energy.
 	 * Battery lost energy during time.
 	 * It also summarize current energyLevel (charge lvl in %).
-	 * </pre>
+	 * 
 	 */
 	class Battery {
 		private float initialCapacity; 		//mAh
@@ -771,7 +771,7 @@ class Node {
 		private double timeOfLastUpdate;		//s
 		private double usedEnergy1;
 		/**
-		 * <pre>
+		 * 
 		 * Initiates a battery parameters.
 		 * Diffrent types of batteries are specified:
 		 * 0 	- small battery
@@ -780,7 +780,7 @@ class Node {
 		 * 3	- tiny battery (for testing purposes in short time)
 		 * 
 		 * -1 	- power-supplied (infinite battery)
-		 * </pre>
+		 * 
 		 * @param type Type of battery
 		 */
 		Battery(int type){	
@@ -918,10 +918,10 @@ class Node {
 //============================== Node.Reception: CLASS ==================================//
 //=======================================================================================//
 	/**
-	 * <pre>
+	 * 
 	 * Act of receiving of a transmission. 
 	 * Even a transmission that can't be successfully received (e.g. when the node phyState is TX (0) or SYNC (1)) is receiving (and influences the synced reception).
-	 * </pre>
+	 * 
 	 */
 	class Reception {
 		/**
@@ -929,14 +929,14 @@ class Node {
 		 */
 		final Transmission transmission;
 		/**
-		 * <pre>
+		 * 
 		 * Transmission power decreased by path loss...
 		 * TODO: ... and obstacles !
-		 * </pre>
+		 * 
 		 */
 		private float receptionPower;
 		/**
-		 * <pre>
+		 * 
 		 * Defines how noise level changes during the transmission - consists of arraylist of Noise (startTime, currentNoiseLvl) objects eg.
 		 * 0.0	24
 		 * 0.3	26
@@ -947,7 +947,7 @@ class Node {
 		 * It is collected as in YANS
 		 * 
 		 * ATTENTION: At the moment I'm going to calculate one SNR for whole reception period taking into account the highest noise lvl.
-		 * </pre>
+		 * 
 		 * TODO: Enhance SNR / BER / Ploss relations
 		 */
 		private ArrayList<Noise> noiseDuringTransmission=new ArrayList<Noise>();		
@@ -971,13 +971,13 @@ class Node {
 			}
 		}
 		/**
-		 * <pre>
+		 * 
 		 * Updates noise lvl seen by the node. It is a sum of power of all receiving transmissions except the synced one.
 		 * Actually, when syncing process is in progress (so there is no synced transmission), the syncing transmission power should not be counted.
 		 * The easiest way to workaround it, is to get noise level from Medium and subtract the syncing transmission power. (* see source code below)
 		 * Maybe it's not elegant, but otherwise it would need some extra logic - e.g. creation of syncingReception object for the time of syncing.
 		 * If it hurts your eyes, feel free to reimplement. 
-		 * </pre>
+		 * 
 		 * 
 		 * @param syncingTransmissionPower
 		 * @see Helper#subDBm(float, float)	
@@ -1025,11 +1025,11 @@ class Node {
 		  */
 		private boolean isTheReceptionSuccessfull(){return (getProbabilityOfSuccessfullReception()>Helper.generator.nextFloat()); }		
 		/**
-		  * <pre>
+		  * 
 		  * I assumed, that the probability depends directly on SNR 
 		  * If SNR higher than MIN_SNR_SYNC_P1 - P=1, if SNR smaller than MIN_SNR_SYNC_P0 - P=0
 		  * in between - P proportional to the value
-		  * </pre>
+		  * 
 		  * TODO: How to calculate probability of successfull synchronization ?
 		  */
 		 private float getProbabilityOfSuccessfullSync(){

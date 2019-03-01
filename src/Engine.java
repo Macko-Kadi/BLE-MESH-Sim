@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * <pre>
+ *  
  * Main class of the simulator. Everything starts and ends here.
  * You create an environment here
- * </pre>
+ *  
  * 
  * @author macso
  *

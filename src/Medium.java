@@ -2,13 +2,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * <pre>
+ * 
  * The class represents wireless medium.
  * Main components: 
  * - a list of transmissions in the air
  * - noise levels as seen by particular nodes
  * - path losses between each pair of nodes (Transmission power - Path Loss = Receiving power)
- * </pre>
+ * 
  *
  */
 class Medium {
@@ -26,24 +26,24 @@ class Medium {
 	 */
 	static ArrayList<Transmission> currentTransmissions=new ArrayList<Transmission>();
 	/**
-	 * <pre>
+	 * 
 	 *List of noise lvls (channel 37) (for all nodes). 
 	 *Values in the list are calculated with taking into account, that node synced reception and a transmission that node transmit is NOT a noise from the node perspective.
-	 *</pre>
+	 *
 	 */
 	static ArrayList<Float> globalNoiseLvl37 = new ArrayList<Float>();
 	/**
-	 * <pre>
+	 * 
 	 *List of noise lvls (channel 38) (for all nodes). 
 	 *Values in the list are calculated with taking into account, that node synced reception and a transmission that node transmit is NOT a noise from the node perspective.
-	 *</pre>
+	 *
 	 */
 	static ArrayList<Float> globalNoiseLvl38 = new ArrayList<Float>();
 	/**
-	 * <pre>
+	 * 
 	 *List of noise lvls (channel 39) (for all nodes). 
 	 *Values in the list are calculated with taking into account, that node synced reception and a transmission that node transmit is NOT a noise from the node perspective.
-	 *</pre>
+	 *
 	 */
 	static ArrayList<Float> globalNoiseLvl39 = new ArrayList<Float>();
 	/**
@@ -167,13 +167,13 @@ class Medium {
 			distancePowerDecreaseMatrix[i][j]=getDistancePowerDecrease(Engine.LIST_OF_NODES.get(i).position, Engine.LIST_OF_NODES.get(j).position);
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Path loss propagation model - From the document: Yet Another Network Simulator (auth. Lacage, Henderson), chapter 8.1
 	 * Pl(d)=Pl(d0)+n*10*log_10(d/d0)
 	 * 
 	 * The function calculates this part: n*10*log_10(d/d0)
 	 * n=3 - From the document: Yet Another Network Simulator (auth. Lacage, Henderson), chapter 8.1
-	 * </pre>
+	 * 
 	 */
 	private static float getDistancePowerDecrease(Position pos1, Position pos2){
 		return (float)(30*Math.log10(Position.getDistance(pos1, pos2)));

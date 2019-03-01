@@ -49,7 +49,7 @@ public class ResultsExcel {
     			}
     		}
 
-    		minEnergy = Energy.stream().min(Comparator.comparing(i -> i)).get();
+    //		minEnergy = Energy.stream().min(Comparator.comparing(i -> i)).get();
     		for (Entry<Byte, Double> entry : energyMap.entrySet()) {
     			if (entry.getValue().equals(minEnergy)) {
     				if (minNodes.equals("zero"))
@@ -59,7 +59,7 @@ public class ResultsExcel {
     			}
     		}
 
-    		maxEnergy = Energy.stream().max(Comparator.comparing(i -> i)).get();
+   // 		maxEnergy = Energy.stream().max(Comparator.comparing(i -> i)).get();
     		for (Entry<Byte, Double> entry : energyMap.entrySet()) {
     			if (entry.getValue().equals(maxEnergy)) {
     				if (maxNodes.equals("zero"))

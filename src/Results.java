@@ -86,7 +86,7 @@ public class Results {
 			}
 		}
 
-		minEnergy = Energy.stream().min(Comparator.comparing(i -> i)).get();
+	//	minEnergy = Energy.stream().min(Comparator.comparing(i -> i)).get();
 		for (Entry<Byte, Double> entry : energyMap.entrySet()) {
 			if (entry.getValue().equals(minEnergy)) {
 				if (minNodes.equals("zero"))
@@ -96,7 +96,7 @@ public class Results {
 			}
 		}
 
-		maxEnergy = Energy.stream().max(Comparator.comparing(i -> i)).get();
+//		maxEnergy = Energy.stream().max(Comparator.comparing(i -> i)).get();
 		for (Entry<Byte, Double> entry : energyMap.entrySet()) {
 			if (entry.getValue().equals(maxEnergy)) {
 				if (maxNodes.equals("zero"))
@@ -157,7 +157,7 @@ public class Results {
 		}
 		return number;
 	}
-	//MACIEK coœ zle
+	//MACIEK cos zle
 	private static void packetLoss() {
 		writer.println("Packet loss:  \n");
 		writer.println("Number of generated messages: " + (Node.generatedPacketCount) + "\n");

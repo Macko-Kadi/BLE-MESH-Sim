@@ -1,11 +1,11 @@
 import java.util.ArrayList;
 /**
- * <pre>
+ * 
  * The class represents a list of events. The list is sorted* and the first event from the list is evaluated.
  * The evaluated event may trigger another events, that are added to the list. Repeat. 
  * 
  * *Actually we never sort the list, but when we add events to the list, at first we look for proper position in the list, taking into account the event time.
- * </pre>
+ * 
  */
 class EventList {
 	ArrayList<Event> theList= new ArrayList<Event>();
@@ -39,12 +39,12 @@ class EventList {
 		return theList.get(0).startTime;
 	}
 	/**
-	 * <pre>
+	 * 
 	 * Removes events that are related with a node (the node probably gets discharged or goes sleep so may not perform any actions)
 	 * 
 	 * REMARK: The function does not remove the 0 element from the list - it will be removed by performFirstEvent()
 	 * If the function would remove the 0 element, then next event would become zero element and then would be removed as well (because of performFirstEvent(), theList.remove(0))	
-	 * </pre>
+	 * 
 	 * @param ID The node ID
 	 */
 	void removeEventsOfNode(byte ID){
