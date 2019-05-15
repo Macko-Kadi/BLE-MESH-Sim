@@ -239,12 +239,11 @@ class Engine {
 	 * @return BATTERY_DISCHARGED event or null
 	 */
 	static Event checkNodeBatteryLevel(Node n) {
-		n.updateTransmissionPower(); // Just in case - update battery lvl if the state does not change during
-										// simulation (eg. in tests when a node is set to sleep for the whole time)
-		if (n.getCurrentBatteryLevel() < 3 && !n.getNodeState().equals("TURNED_OFF")) { // if battery lvl lower than 3%
-																						// and node status is not
-																						// discharged
-			return new Event(simTime, "BATTERY_DISCHARGED", Byte.toString(n.ID)); // it's discharged.
+		if (n.batteryPowered) n.drainBattery();
+		n.updateTransmissionPower(); 	
+		// if battery lvl lower than 3% and node status is not TURNED_OFF, 
+		if (n.getCurrentBatteryLevel() < 3 && !n.getNodeState().equals("TURNED_OFF")) { // it's discharged.
+			return new Event(simTime, "BATTERY_DISCHARGED", Byte.toString(n.ID)); 
 		}
 		return null;
 	}

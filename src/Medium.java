@@ -123,10 +123,12 @@ class Medium {
 		}
 	}
 	/**
-	 * Updates noise lvl for a node.
+	 * 
+	 * Updates noise lvl for a node on channel.
 	 * 
 	 * @param receiver
 	 * @param transmittersIDs list of transmitting nodes
+	 * @param channel consider only transmissions on this channel
 	 * @return noise lvl as seen by the receiver
 	 *
 	 */
