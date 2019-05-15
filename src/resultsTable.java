@@ -24,7 +24,7 @@ public class resultsTable {
 	public static void simulationResultsTable() {
 
 		try {
-			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\tables\\";
+			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM2\\results\\";
 			String fileName = (Engine.algorithm + "_" + Topology.topologyType + "_" + Topology.NR_OF_NODES + ".txt");
 			writer = new PrintWriter(path + fileName, "UTF-8");
 		} catch (FileNotFoundException e) {
@@ -128,9 +128,9 @@ public class resultsTable {
 
 	private static void packetLoss() {
 		writer.println("Packet loss:  \n");
-		writer.println("Number of generated messages: " + (Node.generatedPacketCount-1) + "\n");
+		writer.println("Number of generated messages: " + Node.generatedPacketCount + "\n");
 		writer.println("Number of received messages: " + Node.packetReceivedCount + "\n");
-		double difference = Node.generatedPacketCount-1 -Node.packetReceivedCount; 
+		double difference = Node.generatedPacketCount -Node.packetReceivedCount; 
 		writer.println("Difference: " + difference + " \n");
 		writer.println("Number of backoff procedures: " + Node.retransmit + "\n");
 		writer.println("========================================================================= \n");

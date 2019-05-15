@@ -14,14 +14,23 @@ import java.util.Map;
 
 public class Topology {
 
-	public static String topologyFilePath = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\testtopology\\";
-	public static String topologyFileName = ("4_mesh.txt");
-//	public static String topologyFileName = ("9_chain.txt");
-//	public static String topologyFileName = ("17_chain_dense.txt");
-//	public static String topologyFileName = ("12_mesh.txt");
-// public static String topologyFileName = ("25_mesh_dense.txt");
-//	public static String topologyFileName = ("30_U.txt");
-//	public static String topologyFileName = ("_U.txt");
+	public static String topologyFilePath = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM2\\testtopology\\";
+//	public static String topologyFileName = ("16_mesh.txt");
+	
+//	public static String topologyFileName = ("36_chain.txt");
+//	public static String topologyFileName = ("36_mesh.txt");
+//	public static String topologyFileName = ("36_U.txt");
+	
+//	public static String topologyFileName = ("4_mesh.txt");
+//	public static String topologyFileName = ("9_mesh.txt");
+//	public static String topologyFileName = ("10_mesh.txt");
+	public static String topologyFileName = ("topo_100_D20_1.txt");
+//	public static String topologyFileName = ("49_mesh.txt");
+//	public static String topologyFileName = ("100_mesh.txt");
+	
+//	public static String topologyFileName = ("36_mesh_2.txt");
+//	public static String topologyFileName = ("36_mesh_3.txt");
+	
 	public static String topologyFile = (topologyFilePath+topologyFileName);
 	public static String topologyType;
 	public static int NR_OF_NODES; 
@@ -50,7 +59,7 @@ public class Topology {
 				}
 				else {
 				String[] strlines = line.split(" ");
-				System.out.println("ID: "+strlines[0]+" x: "+ strlines[1]+" y; "+ strlines[2]);
+		//		System.out.println("ID: "+strlines[0]+" x: "+ strlines[1]+" y; "+ strlines[2]);
 				byte nID=Byte.valueOf(strlines[0]);
 				float file_x=Float.valueOf(strlines[1]);
 				float file_y=Float.valueOf(strlines[2]);

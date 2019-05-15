@@ -1,0 +1,988 @@
+Simulation with 25 nodes in Mesh_dense topology. 
+
+Algorithm used: None
+
+========================================================================= 
+
+Node ID 0
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5275425741065uWh 
+
+Used energy : 11.472459810079272uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 1
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 299.99105690512806uWh 
+
+Used energy : 10.00894547905773uWh 
+
+Battery level : 96.77% 
+
+
+
+Node ID 2
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5275425561298uWh 
+
+Used energy : 11.472459828056003uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 3
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754319549035uWh 
+
+Used energy : 11.472459188695439uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 4
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5275428065961uWh 
+
+Used energy : 11.472459577589689uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 5
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754306810425uWh 
+
+Used energy : 11.47245931608154uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 6
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754339668763uWh 
+
+Used energy : 11.472458987498158uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 7
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5180987440401uWh 
+
+Used energy : 11.481903640145674uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 8
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5180983385334uWh 
+
+Used energy : 11.481904045652414uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 9
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.51809886727665uWh 
+
+Used energy : 11.481903516909142uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 10
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754258982725uWh 
+
+Used energy : 11.472459794358514uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 11
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5086535280308uWh 
+
+Used energy : 11.491348856154993uWh 
+
+Battery level : 96.29% 
+
+
+
+Node ID 12
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754250845237uWh 
+
+Used energy : 11.47245987573342uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 13
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.51809870351076uWh 
+
+Used energy : 11.481903680675032uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 14
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.518098544605uWh 
+
+Used energy : 11.48190383958081uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 15
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5275432055605uWh 
+
+Used energy : 11.472459178625272uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 16
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754360045uWh 
+
+Used energy : 11.472458783735817uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 17
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5180987428322uWh 
+
+Used energy : 11.481903641353597uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 18
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5180989377625uWh 
+
+Used energy : 11.481903446423303uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 19
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5180987749487uWh 
+
+Used energy : 11.481903609237065uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 20
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5275426561884uWh 
+
+Used energy : 11.472459727997375uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 21
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.52754252860336uWh 
+
+Used energy : 11.472459855582429uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 22
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5275426956946uWh 
+
+Used energy : 11.472459688491199uWh 
+
+Battery level : 96.3% 
+
+
+
+Node ID 23
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.50865399484405uWh 
+
+Used energy : 11.491348389341738uWh 
+
+Battery level : 96.29% 
+
+
+
+Node ID 24
+
+Initial energy level : 310.0000023841858uWh 
+
+Current energy level : 298.5086538389936uWh 
+
+Used energy : 11.491348545192182uWh 
+
+Battery level : 96.29% 
+
+
+
+Smallest amount of used energy 10.00894547905773 uWh, by node(s) 1 
+
+Biggest amount of used energy 11.491348856154993 uWh, by node(s) 11 
+
+Total energy used in simulation: 285.4801943022478uWh 
+
+========================================================================= 
+
+Average amount of energy used in simulation: 11.419207772089912 ďż˝ 0.11520075587802739 uWh 
+
+========================================================================= 
+
+Delay (period of time between packet generation and packet being received): 
+
+Delay: 0.1774139404296875 
+
+Delay: 0.18804931640625 
+
+Delay: 0.08014693111181259 
+
+Delay: 0.1083831787109375 
+
+Delay: 0.13226318359375 
+
+Delay: 0.1382312774658203 
+
+Delay: 0.038482666015625 
+
+Delay: 0.8166965842247009 
+
+Delay: 0.078399658203125 
+
+Delay: 0.14437973499298096 
+
+Delay: 0.0159454345703125 
+
+Delay: 0.14061737060546875 
+
+Delay: 0.09933090209960938 
+
+Delay: 0.08453369140625 
+
+Delay: 0.0993499755859375 
+
+Delay: 0.19589625298976898 
+
+Delay: 0.025115966796875 
+
+Delay: 0.10422897338867188 
+
+Delay: 0.122802734375 
+
+Delay: 0.0841827392578125 
+
+Delay: 0.10577392578125 
+
+Delay: 0.031158447265625 
+
+Delay: 0.12634658813476562 
+
+Delay: 0.22376646101474762 
+
+Delay: 0.102203369140625 
+
+Delay: 0.039886474609375 
+
+Delay: 0.0427093505859375 
+
+Delay: 0.0378265380859375 
+
+Delay: 0.01851654052734375 
+
+Delay: 0.05352783203125 
+
+Delay: 0.012786865234375 
+
+Delay: 0.052642822265625 
+
+Delay: 0.01129150390625 
+
+Delay: 0.09307479858398438 
+
+Delay: 0.10187911987304688 
+
+Delay: 0.0883636474609375 
+
+Delay: 0.08209228515625 
+
+Delay: 0.0950927734375 
+
+Delay: 0.136871337890625 
+
+Delay: 0.02553725242614746 
+
+Delay: 0.06060791015625 
+
+Delay: 0.0985260009765625 
+
+Delay: 0.072357177734375 
+
+Delay: 0.17201995849609375 
+
+Delay: 0.0796966552734375 
+
+Delay: 0.03577423095703125 
+
+Delay: 0.129638671875 
+
+Delay: 0.3120151162147522 
+
+Delay: 0.11721038818359375 
+
+Delay: 0.0830078125 
+
+Delay: 0.087066650390625 
+
+Delay: 0.052581787109375 
+
+Delay: 0.05333709716796875 
+
+Delay: 0.0249481201171875 
+
+Delay: 0.05261993408203125 
+
+Delay: 0.021240234375 
+
+Delay: 0.02313995361328125 
+
+Delay: 0.04962175339460373 
+
+Delay: 0.03851318359375 
+
+Delay: 0.02347564697265625 
+
+Delay: 0.111236572265625 
+
+Delay: 0.08858823776245117 
+
+Delay: 0.155303955078125 
+
+Delay: 0.059594426304101944 
+
+Delay: 0.1385498046875 
+
+Delay: 0.072296142578125 
+
+Delay: 0.076446533203125 
+
+Delay: 0.1260986328125 
+
+Delay: 0.0957489013671875 
+
+Delay: 0.5194470286369324 
+
+Delay: 0.024261474609375 
+
+Delay: 0.0232086181640625 
+
+Delay: 0.14312744140625 
+
+Delay: 0.0311279296875 
+
+Delay: 0.123748779296875 
+
+Delay: 0.071624755859375 
+
+Delay: 0.0990753173828125 
+
+Delay: 0.10351943969726562 
+
+Delay: 0.4924370050430298 
+
+Delay: 0.11575126647949219 
+
+Delay: 1.0472116470336914 
+
+Delay: 0.1480712890625 
+
+Delay: 0.141845703125 
+
+Delay: 0.0383148193359375 
+
+Delay: 0.050436973571777344 
+
+Delay: 0.068717822432518 
+
+Delay: 0.09250640869140625 
+
+Delay: 0.08407783508300781 
+
+Delay: 0.0319671630859375 
+
+Delay: 0.04106903076171875 
+
+Delay: 0.008758544921875 
+
+Delay: 0.02484130859375 
+
+Delay: 0.1197509765625 
+
+Delay: 0.10479736328125 
+
+Delay: 0.09603023529052734 
+
+Delay: 0.7336003184318542 
+
+Delay: 0.05023193359375 
+
+Delay: 0.08636856079101562 
+
+Delay: 0.03791046142578125 
+
+Delay: 0.02315521240234375 
+
+Delay: 0.0734405517578125 
+
+Delay: 0.08599853515625 
+
+Delay: 0.0498199462890625 
+
+Delay: 0.1497650146484375 
+
+Delay: 0.0764007568359375 
+
+Delay: 0.157958984375 
+
+Delay: 0.05983734130859375 
+
+Delay: 0.101348876953125 
+
+Delay: 0.0186309814453125 
+
+Delay: 0.0909881591796875 
+
+Delay: 0.12929534912109375 
+
+Delay: 0.082122802734375 
+
+Delay: 0.070587158203125 
+
+Delay: 0.1134185791015625 
+
+Delay: 0.09246826171875 
+
+Delay: 0.9387264847755432 
+
+Delay: 0.108306884765625 
+
+Delay: 0.1498870849609375 
+
+Delay: 0.21883206069469452 
+
+Delay: 0.18011474609375 
+
+Delay: 0.0930328369140625 
+
+Delay: 0.12615966796875 
+
+Delay: 0.13971710205078125 
+
+Delay: 0.10361480712890625 
+
+Delay: 0.039581298828125 
+
+Delay: 0.067779541015625 
+
+Delay: 0.05108642578125 
+
+Delay: 0.046783447265625 
+
+Delay: 0.08990478515625 
+
+Delay: 0.1900787353515625 
+
+Delay: 0.100433349609375 
+
+Delay: 0.0785675048828125 
+
+Delay: 0.119171142578125 
+
+Delay: 0.054355621337890625 
+
+Delay: 0.1029052734375 
+
+Delay: 0.15948498249053955 
+
+Delay: 0.0977325439453125 
+
+Delay: 0.0486602783203125 
+
+Delay: 0.10991668701171875 
+
+Delay: 0.0276031494140625 
+
+Delay: 0.1379241943359375 
+
+Delay: 0.028961181640625 
+
+Delay: 0.1109619140625 
+
+Delay: 0.038360595703125 
+
+Delay: 0.0720977783203125 
+
+Delay: 0.069549560546875 
+
+Delay: 0.0223388671875 
+
+Delay: 0.013931861147284508 
+
+Delay: 0.18032987415790558 
+
+Delay: 0.1634674072265625 
+
+Delay: 0.02392578125 
+
+Delay: 0.09148216247558594 
+
+Delay: 0.08172607421875 
+
+Delay: 0.11688232421875 
+
+Delay: 0.11765289306640625 
+
+========================================================================= 
+
+Average packet delay in simulation: 0.11424621166961808 ďż˝ 0.02275930023284734 
+
+========================================================================= 
+
+Packet loss:  
+
+Number of generated messages: 161
+
+Number of received messages: 155
+
+Number of backoff procedures: 472
+
+IPLR: 1.0 % 
+
+========================================================================= 
+
+iloďż˝ďż˝ przeskokďż˝w ? 
+
+Packet: 0:1:0	 TTL: -4
+
+Packet: 2:1:0	 TTL: -4
+
+Packet: 3:1:0	 TTL: -4
+
+Packet: 4:1:0	 TTL: -4
+
+Packet: 5:1:0	 TTL: -4
+
+Packet: 6:1:0	 TTL: -4
+
+Packet: 7:1:0	 TTL: 20
+
+Packet: 8:1:0	 TTL: 20
+
+Packet: 9:1:0	 TTL: -4
+
+Packet: 10:1:0	 TTL: -4
+
+Packet: 11:1:0	 TTL: 20
+
+Packet: 12:1:0	 TTL: -4
+
+Packet: 13:1:0	 TTL: 12
+
+Packet: 14:1:0	 TTL: -4
+
+Packet: 15:1:0	 TTL: -4
+
+Packet: 16:1:0	 TTL: -4
+
+Packet: 17:1:0	 TTL: -4
+
+Packet: 18:1:0	 TTL: -4
+
+Packet: 19:1:0	 TTL: -4
+
+Packet: 20:1:0	 TTL: -4
+
+Packet: 21:1:0	 TTL: -4
+
+Packet: 22:1:0	 TTL: -4
+
+Packet: 23:1:0	 TTL: 20
+
+Packet: 24:1:0	 TTL: 20
+
+Packet: 23:1:1	 TTL: -4
+
+Packet: 3:1:1	 TTL: -4
+
+Packet: 5:1:1	 TTL: -4
+
+Packet: 15:1:1	 TTL: -4
+
+Packet: 3:1:2	 TTL: -4
+
+Packet: 18:1:1	 TTL: -4
+
+Packet: 20:1:1	 TTL: -4
+
+Packet: 0:1:1	 TTL: -4
+
+Packet: 23:1:2	 TTL: -4
+
+Packet: 10:1:1	 TTL: -4
+
+Packet: 12:1:1	 TTL: -4
+
+Packet: 10:1:2	 TTL: -4
+
+Packet: 19:1:1	 TTL: -4
+
+Packet: 21:1:1	 TTL: -4
+
+Packet: 11:1:1	 TTL: -4
+
+Packet: 13:1:1	 TTL: -4
+
+Packet: 10:1:3	 TTL: -4
+
+Packet: 13:1:2	 TTL: -4
+
+Packet: 18:1:2	 TTL: -4
+
+Packet: 16:1:1	 TTL: -4
+
+Packet: 5:1:2	 TTL: -4
+
+Packet: 23:1:3	 TTL: -4
+
+Packet: 6:1:1	 TTL: -4
+
+Packet: 8:1:1	 TTL: -4
+
+Packet: 21:1:2	 TTL: -4
+
+Packet: 12:1:2	 TTL: -4
+
+Packet: 8:1:2	 TTL: -4
+
+Packet: 17:1:1	 TTL: -4
+
+Packet: 17:1:2	 TTL: -4
+
+Packet: 0:1:2	 TTL: -4
+
+Packet: 18:1:3	 TTL: -4
+
+Packet: 7:1:1	 TTL: -4
+
+Packet: 5:1:3	 TTL: -4
+
+Packet: 9:1:1	 TTL: -4
+
+Packet: 16:1:2	 TTL: -4
+
+Packet: 16:1:3	 TTL: -4
+
+Packet: 11:1:2	 TTL: -4
+
+Packet: 11:1:3	 TTL: -4
+
+Packet: 3:1:3	 TTL: -4
+
+Packet: 11:1:4	 TTL: -4
+
+Packet: 20:1:2	 TTL: -4
+
+Packet: 7:1:2	 TTL: -4
+
+Packet: 11:1:5	 TTL: -4
+
+Packet: 3:1:4	 TTL: -4
+
+Packet: 13:1:3	 TTL: -4
+
+Packet: 5:1:4	 TTL: -4
+
+Packet: 20:1:3	 TTL: -4
+
+Packet: 22:1:1	 TTL: -4
+
+Packet: 0:1:3	 TTL: -4
+
+Packet: 24:1:1	 TTL: -4
+
+Packet: 20:1:4	 TTL: -4
+
+Packet: 24:1:2	 TTL: -4
+
+Packet: 23:1:4	 TTL: -4
+
+Packet: 2:1:1	 TTL: -4
+
+Packet: 10:1:4	 TTL: -4
+
+Packet: 6:1:2	 TTL: -4
+
+Packet: 11:1:6	 TTL: -4
+
+Packet: 13:1:4	 TTL: -4
+
+Packet: 20:1:5	 TTL: -4
+
+Packet: 6:1:3	 TTL: -4
+
+Packet: 4:1:1	 TTL: -4
+
+Packet: 13:1:5	 TTL: -4
+
+Packet: 15:1:2	 TTL: -4
+
+Packet: 24:1:3	 TTL: -4
+
+Packet: 16:1:4	 TTL: -4
+
+Packet: 15:1:3	 TTL: -4
+
+Packet: 14:1:1	 TTL: -4
+
+Packet: 8:1:3	 TTL: -4
+
+Packet: 10:1:5	 TTL: -4
+
+Packet: 6:1:4	 TTL: -4
+
+Packet: 9:1:2	 TTL: -4
+
+Packet: 3:1:5	 TTL: -4
+
+Packet: 17:1:3	 TTL: -4
+
+Packet: 0:1:4	 TTL: -4
+
+Packet: 2:1:2	 TTL: -4
+
+Packet: 17:1:4	 TTL: -4
+
+Packet: 20:1:6	 TTL: -4
+
+Packet: 22:1:2	 TTL: -4
+
+Packet: 14:1:2	 TTL: -4
+
+Packet: 5:1:5	 TTL: -4
+
+Packet: 23:1:5	 TTL: -4
+
+Packet: 17:1:5	 TTL: -4
+
+Packet: 19:1:2	 TTL: -4
+
+Packet: 0:1:5	 TTL: -4
+
+Packet: 16:1:5	 TTL: -4
+
+Packet: 5:1:6	 TTL: -4
+
+Packet: 11:1:7	 TTL: -4
+
+Packet: 19:1:3	 TTL: -4
+
+Packet: 24:1:4	 TTL: -4
+
+Packet: 16:1:6	 TTL: -4
+
+Packet: 8:1:4	 TTL: -4
+
+Packet: 14:1:3	 TTL: -4
+
+Packet: 12:1:3	 TTL: -4
+
+Packet: 20:1:7	 TTL: -4
+
+Packet: 12:1:4	 TTL: -4
+
+Packet: 15:1:4	 TTL: -4
+
+Packet: 9:1:3	 TTL: -4
+
+Packet: 21:1:3	 TTL: -4
+
+Packet: 20:1:8	 TTL: -4
+
+Packet: 0:1:6	 TTL: -4
+
+Packet: 11:1:8	 TTL: -4
+
+Packet: 19:1:4	 TTL: -4
+
+Packet: 14:1:4	 TTL: -4
+
+Packet: 22:1:3	 TTL: -4
+
+Packet: 18:1:4	 TTL: -4
+
+Packet: 6:1:5	 TTL: -4
+
+Packet: 14:1:5	 TTL: -4
+
+Packet: 7:1:3	 TTL: -4
+
+Packet: 14:1:6	 TTL: -4
+
+Packet: 18:1:5	 TTL: -4
+
+Packet: 12:1:5	 TTL: -4
+
+Packet: 22:1:4	 TTL: -4
+
+Packet: 17:1:6	 TTL: -4
+
+Packet: 21:1:4	 TTL: -4
+
+Packet: 3:1:6	 TTL: -4
+
+Packet: 3:1:7	 TTL: -4
+
+Packet: 12:1:6	 TTL: -4
+
+Packet: 10:1:6	 TTL: -4
+
+Packet: 16:1:7	 TTL: -4
+
+Packet: 6:1:6	 TTL: -4
+
+Packet: 8:1:5	 TTL: -4
+
+Packet: 8:1:6	 TTL: -4
+
+Packet: 13:1:6	 TTL: -4
+
+Packet: 5:1:7	 TTL: -4
+
+Packet: 14:1:7	 TTL: -4
+
+Packet: 4:1:2	 TTL: -4
+
+Packet: 15:1:5	 TTL: -4
+
+Packet: 5:1:8	 TTL: -4
+
+Packet: 23:1:6	 TTL: -4
+
+Packet: 12:1:7	 TTL: -4
+
+Packet: 7:1:4	 TTL: -4
+
+Packet: 13:1:7	 TTL: -4
+
+Packet: 17:1:7	 TTL: -4
+
+Packet: 7:1:5	 TTL: -4
+
+Packet: 14:1:8	 TTL: -4
+
+Packet: 8:1:7	 TTL: -4
+
+Packet: 7:1:6	 TTL: -4
+
+Packet: 10:1:7	 TTL: 20
+
+========================================================================= 
+
+Average amount of hops made by a packet: 23.012345679012345 ďż˝ 0.7235071530250785 
+
+========================================================================= 
+
+Number of packets that reached destination more than once: 0
+
+========================================================================= 
+
+Number of collisions during simulation: 2606
+
+========================================================================= 
+

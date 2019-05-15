@@ -24,7 +24,7 @@ public class Results {
 	public static void simulationResults() {
 
 		try {
-			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\";
+			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM2\\results\\";
 			String fileName = (Engine.algorithm + "_" + Topology.topologyType + "_" + Topology.NR_OF_NODES + ".txt");
 			writer = new PrintWriter(path + fileName, "UTF-8");
 		} catch (FileNotFoundException e) {
@@ -127,10 +127,12 @@ public class Results {
 		for (Entry<String, Double> startPacket : Node.timeOfPacketGeneration.entrySet()) {
 			String tmppacketID = startPacket.getKey();
 			Double tmppacketStart = startPacket.getValue();
+		//	System.out.println("Results.packetDelay() - tmppacketStart "+ tmppacketStart);
 			for (Entry<String, Double> receivePacket: Node.timeOfPacketReception.entrySet()) {
 				if(receivePacket.getKey().equals(tmppacketID)) {
 					Double packetDelay = (double) (receivePacket.getValue() - tmppacketStart);
-					writer.println("Delay: "+packetDelay+" \n");
+				//	writer.println("Delay: "+packetDelay+" \n");
+			//	System.out.println("Results.packetDelay(): "+packetDelay);
 					Delay.add(packetDelay);
 				}		
 			}
@@ -163,6 +165,7 @@ public class Results {
 		writer.println("Number of generated messages: " + (Node.generatedPacketCount) + "\n");
 		writer.println("Number of received messages: " + Node.packetReceivedCount + "\n");
 		int numberOfPacketsInTheSystem=getNumberOfPacketsInTheSystem();
+		System.out.println("nr in system: "+ numberOfPacketsInTheSystem);
 		writer.println("Number of packets in the system: " + numberOfPacketsInTheSystem+"\n");
 		writer.println("Number of backoff procedures: " + Node.retransmit + "\n");
 		float IPLRmax=100*(float)(Node.generatedPacketCount-Node.packetReceivedCount)/Node.generatedPacketCount;								 //MACIEK poprawka
@@ -174,8 +177,10 @@ public class Results {
 	private static void hopsCounter() {
 		writer.println("ilo�� przeskok�w ? "+"\n");
 		for (Packet p : Node.packetList) {
-			writer.println("Packet: "+p.header.packetID+"	 TTL: "+p.header.TTL+"\n");
+//			writer.println("Packet: "+p.header.packetID+"	 TTL: "+p.header.TTL+"\n");
+		//	System.out.println("Packet: "+p.header.packetID+"	 TTL: "+p.header.TTL+"\n");
 			double hops = 20-(double) p.header.TTL;
+	//		System.out.println(hops);
 			Hops.add(hops);
 		}
 		writer.println("========================================================================= \n");

@@ -39,9 +39,8 @@ class Node {
 	/**
 	 * According to NOTES BLE - Advertising Events are scheduled with a gap equal to (const)advInterval+(random)advDelay 
 	 * advInterval varies from 20ms to 10s (can be adjusted)
-	 * in the nordic implementation it is set to 3ms, same here
 	 */
-	static final float ADV_INTERVAL=0.003f;
+	static final float ADV_INTERVAL=0.023f; //23ms - 20 + 3 as constant of adv_delay
 	/**
 	 * According to NOTES BLE - Advertising Events are scheduled with a gap equal to (const)advInterval+(random)advDelay 
 	 * advDelay is in the range of 0 to 10 ms, k*ADV_INTERVAL_SLOT, where k=0:16, ADV_INTERVAL_SLOT=0.625ms=0.000625s
@@ -74,7 +73,7 @@ class Node {
 	 * TODO: Is the value realistic ? I used these http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
 	 * </pre>
 	 */
-	private static final float MIN_SNR_SYNC_P0=25; 
+	private static final float MIN_SNR_SYNC_P0=50; 
 	/**
 	 * <pre>
 	 * ATTENTION: It is important to distinguish synchronization and data reception phases. 
@@ -98,7 +97,7 @@ class Node {
 	 * 
 	 * TODO: Is the value realistic ?  
 	 */
-	private static final float MIN_SNR_RCVD_P0=15; 
+	private static final float MIN_SNR_RCVD_P0=50; 
 	/**
 	 * Minimum SNR level required for certainty (P=1) of successful transmission reception.
 	 * If SNR is greater than the value, transmission is always successfully received.
@@ -115,13 +114,13 @@ class Node {
 	 * 
 	 * If you want to change maxTransmissionPower into currentTransmissionPower - you will need to periodically update the inStateEnergyConsumption array (since float is not mutable)
 	 * 
-	 * States: [turned off , transmitting, idle/tx_prep, sleep, deep sleep, ?]
+	 * States: [turned off , transmitting, tx_prep, sleep, deep sleep, idle?]
 	 * 
 	 * TODO: Check the values and define required dependencies (if there are any (?)).
 	 * 
 	 * </pre>
 	 */
-	private static final float[] IN_STATE_ENERGY_CONSUMPTION={0,MAX_TRANSMISSION_POWER+0.1f, 0.1f, 0.001f, 0.0001f, 0.0f};	//in mW	
+	private static final float[] IN_STATE_ENERGY_CONSUMPTION={0, 13.5f, 3f, 0.001f, 0.0001f, 0.0f, 0.006f};	//in mW	
 
 	 
 //==================================================================================================//
@@ -335,10 +334,15 @@ class Node {
 		addPacketToQueue(p);	
 		if(Helper.DEBUG_TRANS) System.out.println("Generated packet ID: " +p.header.packetID + " queue state: " + queue.size());	
 		//statistics block
-		packetList.add(p);
-		generatedPacketCount++;
+		generatedPacketCount++;	
+	//	System.out.println("Node.generatePacket(): counter: " + generatedPacketCount);
 		timeOfPacketGeneration.put(p.header.packetID,Engine.simTime);	
 		//schedule next
+		return new Event (packetsSource.timeOfNextGen,"PACKET_GENERATION", Byte.toString(ID));
+	}
+	Event schedulePacketGeneration() {
+		float tempT=packetsSource.intervalGenerator.calculateInterval();
+		packetsSource.timeOfNextGen=Engine.simTime+tempT;		//update the time of next generation:
 		return new Event (packetsSource.timeOfNextGen,"PACKET_GENERATION", Byte.toString(ID));
 	}
 	/**
@@ -348,10 +352,8 @@ class Node {
 	 * @param p
 	 */
 	void addPacketToQueue(Packet p){	
+		p.header.TTL = (byte) (p.header.TTL-1);
 		queue.add(p);
-<<<<<<< HEAD
-		if(queue.size()==1 && !phyState.equals("TX"))return startBackoffProcedure();		
-=======
 	}
 	/**
 	 * <pre>
@@ -394,7 +396,6 @@ class Node {
 			isItSwitchingTime=true;
 			return null;
 		}
->>>>>>> branch 'master' of https://github.com/Macko-Kadi/BLE-MESH-Sim.git
 		else return null;
 	}
 	/**
@@ -441,26 +442,30 @@ class Node {
 	 * 
 	 * @param p 
 	 */
-	private Event processPacket(Packet p, Node n){	
+	private Event processPacket(Packet pOld, Node n){	
 		Event e=null;
+	//	System.out.println("n" + n);
+		Packet p = new Packet(pOld);
 		if(isNodeDestination(p)){
 			if (Helper.DEBUG_CACHE) System.out.println("THE NODE IS PACKET DESTINATION!");
 		}
 		if(!cache.isThePacketInCache(p)){  					//if it is the first time when the node received the packet 
-			p.header.TTL = (byte) (p.header.TTL-1);
-			System.out.println("TTL: "+ p.header.TTL);
+		//	System.out.println("PacketID:" + p.header.packetID);
+		//	System.out.println("TTL: "+ p.header.TTL);
 			addPacketToCache(p);								//add the packet to the cache, and
 			if (isNodeDestination(p)){							//1) if the node is packet destination
 				e=performPacketActions(p); 							//perform actions defined in packet, 
+				packetList.add(p);
 			}
 			else if (doesNodeBelongToDestinationGroup(p)){		//2) if the node belongs to a destination group 
 				e=performPacketActions(p);						//perform actions defined in packet 
+				packetList.add(p);
 				if (Provisioner.isNodeRelay(n)) {
 					addPacketToQueue(p);						//the packet must reach all the group members. If the node is a relay, add the packet to queue
 				}									
 			}
 			else if (Provisioner.isNodeRelay(n)) {   			//3) if not 1) or 2) -> Do not perform action defined in packet. If the node is a relay, add the packet to queue 
-					addPacketToQueue(p);
+				addPacketToQueue(p);
 				}					
 			}
 		//if the packet was cached already
@@ -544,7 +549,8 @@ class Node {
 	 * @param p
 	 */
 	private Event performPacketActions(Packet p){
-		if(Helper.DEBUG_RCV) System.out.println("Packet "+p.header.packetID+" successfully received and processed in node: " +ID);
+		if(Helper.DEBUG_RCV) System.out.println("Packet "+p.header.packetID+ " TTL: "+p.header.TTL+" successfully received and processed in node: " +ID);
+		//System.out.println("Packet "+p.header.packetID+ " TTL: "+p.header.TTL+" successfully received and processed in node: " +ID);
 		packetReceivedCount++;
 		timeOfPacketReception.put(p.header.packetID, Engine.simTime);
 
@@ -654,7 +660,7 @@ class Node {
 		switch (nodeState_){
 			case ("TURNED_OFF"): return (byte)0;
 			case ("TRANSMITTING"): return (byte)1;
-			case ("IDLE"): return (byte)2;
+			case ("IDLE"): return (byte)5;
 			case ("SYNC"): return (byte)2;
 			case ("TX_PREP"): return (byte)2;
 			case ("SLEEP"): return (byte)3;
@@ -726,10 +732,10 @@ class Node {
 		 * @param p
 		 */
 		private void addPacketToCache(Packet p){
-			listOfPackets.add(new CachedPacket(p));
 			if (listOfPackets.size()==maxSize){
-				listOfPackets.remove(0);		
+				listOfPackets.remove(0);	
 			}
+			listOfPackets.add(new CachedPacket(p));
 		}	
 		
 //=============================================================================================//
@@ -908,7 +914,7 @@ class Node {
 			 * TODO: differ packet receivers
 			 * For now: All packets destination -> nodeID = 1 
 			 */
-			byte destID=1;
+			byte destID=35;
 			byte TTL=20;	//time to live, TODO: it is not checked anywhere...
 			Packet P = new Packet(n, destID, packetNumber, packetSize, TTL);  		//create packet
 			float tempT=intervalGenerator.calculateInterval();
@@ -1004,7 +1010,6 @@ class Node {
 		 */
 		private double getSNR(){
 			 if (Helper.DEBUG_NOISE) System.out.println("getSNR() -> reception power " + receptionPower +" getMaxNoise: "+getMaxNoise());
-			// System.out.println(""+ ID + " " +(receptionPower-getMaxNoise()));
 			 return receptionPower-getMaxNoise();
 		}
 		/**

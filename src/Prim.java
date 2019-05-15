@@ -150,7 +150,7 @@ class Prim {
 				float SNR = powerRecv - Medium.BACKGROUND_NOISE;
 				rowInt = (int) row;
 				columnInt = (int) column;
-				if (SNR > 25.00){
+				if (SNR > 50.00){
 					if(rowInt==columnInt)
 						graph[rowInt][columnInt]=0;
 					else

@@ -22,14 +22,20 @@ class Packet {
 		 */
 		controlData=new ControlData();
 	}
+	Packet(Packet p)
+	{
+		header = new Header(p.header);
+		controlData=new ControlData();
+	}
+	
 	/**
 	 * Packet header structure
 	 */
 	class Header{
 		byte TTL;
-		final int packetSize;			//number of bytes - it will determine packet transmission time
-		final byte sourceID;			//ID of a node that generated the packet
-		final byte destinationID;		//ID of a node (or a group) that is the packet destination
+		int packetSize;			//number of bytes - it will determine packet transmission time
+		byte sourceID;			//ID of a node that generated the packet
+		byte destinationID;		//ID of a node (or a group) that is the packet destination
 		/**
 		 * packetID is stored in a node cache - if a node successfully receipt a packet that is in cache, ignores it.
 		 */
@@ -40,6 +46,13 @@ class Packet {
 			packetSize=packetSize_;
 			TTL=TTL_;
 			packetID=""+sourceID+":"+destinationID_+":"+packetNumber_;
+		}
+		Header(Header h){
+			sourceID=h.sourceID;
+			destinationID=h.destinationID;
+			packetSize=h.packetSize;
+			TTL=h.TTL;
+			packetID=h.packetID;
 		}
 		
 	}

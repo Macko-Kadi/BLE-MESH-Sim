@@ -1,0 +1,44 @@
+Simulation with 25 nodes in Mesh topology. 
+
+Algorithm used: Minimum Relay Tree
+
+========================================================================= 
+
+Total energy used in simulation: 2519.869809049615uWh 
+
+Average amount of energy used in simulation: 100.7947923619846 ďż˝ 0.34228862687054706 uWh 
+
+Smallest amount of used energy 100.00000149011956 uWh, by node(s) 24 
+
+Biggest amount of used energy 102.28143910071435 uWh, by node(s) 0 
+
+========================================================================= 
+
+Packet loss:  
+
+Number of generated messages: 632
+
+Number of received messages: 289
+
+Difference: 343.0 
+
+Number of backoff procedures: 0
+
+========================================================================= 
+
+Number of packets that reached destination more than once: 27
+
+========================================================================= 
+
+Average amount of hops made by a packet: 16.684044233807267 ďż˝ 0.5518398158512723 
+
+========================================================================= 
+
+Average packet delay in simulation: 0.06254772733761589 ďż˝ 0.001281023377942634 
+
+========================================================================= 
+
+Number of collisions during simulation: 79
+
+========================================================================= 
+

@@ -23,6 +23,17 @@ class EventList {
 	void addEventsFromList(ArrayList<Event> list){
 		for (Event e : list) addEvent(e);
 	}
+	void removeAllPacketGenerations() {
+		//printEvents();
+		int size=theList.size();
+		for (int i = size-1; i>0; i--) {
+			Event e = theList.get(i);
+			if (e.type.equals("PACKET_GENERATION")) {
+				theList.remove(i);	
+			}
+		}
+		System.out.println("Packet generation events removed!");
+	}
 	/**
 	 * Evaluates first event from the list, then removes it from the list.
 	 * @return new triggered events

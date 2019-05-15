@@ -1,6 +1,6 @@
 /************************************************************************
 Description : Minimum Relay Tree Algorithm Implementation
-Created by : Dominika Zawiślak
+Created by : Dominika Zawislak
 ************************************************************************/
 
 import java.io.FileNotFoundException;
@@ -55,6 +55,7 @@ public class mRT {
 		int start = 0;
 		int end;
 		int w = 0;
+		double inf = Double.POSITIVE_INFINITY;
 
 		ArrayList<Integer> EndV = new ArrayList<Integer>();
 
@@ -68,9 +69,9 @@ public class mRT {
 				float SNR = powerRecv - Medium.BACKGROUND_NOISE;
 				start = (int) startVertex;
 				end = (int) endVertex;
-				System.out.println("NodeIDs: " + start + "-" + end + " powerRecv: " + Medium.getPowerDecreaseBetweenNodes(startVertex, endVertex));
-				System.out.println("NodeIDs: " + start + "-" + end + " SNR: " + SNR);
-				if (SNR > 25.00) {
+			//	System.out.println("NodeIDs: " + start + "-" + end + " powerRecv: " + Medium.getPowerDecreaseBetweenNodes(startVertex, endVertex));
+			//	System.out.println("NodeIDs: " + start + "-" + end + " SNR: " + SNR);
+				if (SNR > 50.00 && SNR!=inf) {
 					w = w + 1;
 					EndV.add(end);
 				}
@@ -111,9 +112,9 @@ public class mRT {
 		// TODO: dodac warunek konca jesli graf jest niespojny tj. jesli w danych cyklu
 		// nie udalo sie nic usunac z toAddList
 		 while ( !toAddList.isEmpty() ) {
-			System.out.println("List of nodes: ");
+	//		System.out.println("List of nodes: ");
 			for (Map.Entry<Integer, Integer> entry : toAddList.entrySet()) {
-				System.out.println(" Node " + entry.getKey() + " degree " + entry.getValue());
+	//			System.out.println(" Node " + entry.getKey() + " degree " + entry.getValue());
 //				writer.println(" Node " + entry.getKey() + " degree " + entry.getValue());
 			}
 
@@ -123,7 +124,6 @@ public class mRT {
 			// Pair newRelay = new Pair(VertexID, Degree);
 
 			if (mrtList.isEmpty()) {
-				// initially set newRelay as the highest degree node from the toAddList
 				Map.Entry<Integer, Integer> one = toAddList.entrySet().iterator().next();
 				VertexID = one.getKey();
 				Degree = one.getValue();
@@ -134,8 +134,7 @@ public class mRT {
 						Degree = entry.getValue();
 					}
 				}
-				System.out.println(" First Relay: " + VertexID + " covered nodes " + Degree + "\n");
-//				writer.println(" First Relay: " + VertexID + " covered nodes " + Degree + "\n");
+		//		System.out.println(" First Relay: " + VertexID + " covered nodes " + Degree + "\n");
 			} else {
 
 //				for (Map.Entry<Integer, Map<Integer, Integer>> neighbour : edgesMatrix.entries()) {
@@ -182,13 +181,7 @@ public class mRT {
 								Degree = (newDegree);
 							}
 						}
-//						}
-//
-//					
-//					}
-//				}
-				System.out.println(" New Relay: " + VertexID + " covered nodes " + Degree + "\n");
-//				writer.println(" New Relay: " + VertexID + " covered nodes " + Degree + "\n");
+	//			System.out.println(" New Relay: " + VertexID + " covered nodes " + Degree + "\n");
 			}
 
 			// 2. add newRelay to mrtList
@@ -202,7 +195,6 @@ public class mRT {
 				temp.keySet().removeAll(toT.keySet());
 				toT.putAll(temp);
 				for (Map.Entry<Integer, Integer> t : toT.entrySet()) {
-					// System.out.println(" nodeT "+ t.getKey() + " degreeT " + t.getValue());
 					if (t.getKey().equals(VertexID)) {
 						toAddList.remove(a.getKey());
 					//add removed neighbours to list of removed nodes
@@ -214,13 +206,11 @@ public class mRT {
 		}
 
 		for (Map.Entry<Integer, Integer> e : mrtList.entrySet()) {
-			System.out.println(" nodemrt " + e.getKey() + " degree " + e.getValue() + "\n");
+	//		System.out.println(" nodemrt " + e.getKey() + " degree " + e.getValue() + "\n");
 //			writer.println(" nodemrt " + e.getKey() + " degree " + e.getValue() + "\n");
 		}
 
 		System.out.println(" Number_of_Relays: " + mrtList.size()+ " from "+ vertexList.size()+ " nodes.");
-//		writer.println(" Number_of_Relays: " + mrtList.size()+ " from "+ vertexList.size()+ " nodes.");
-
 		return (mrtList);
 
 	}

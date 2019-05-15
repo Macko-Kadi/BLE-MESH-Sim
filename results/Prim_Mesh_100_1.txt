@@ -1,0 +1,44 @@
+Simulation with 100 nodes in Mesh topology. 
+
+Algorithm used: Prim
+
+========================================================================= 
+
+Total energy used in simulation: 10386.611917771514uWh 
+
+Average amount of energy used in simulation: 103.86611917771513 ďż˝ 1.4390511696487152 uWh 
+
+Smallest amount of used energy 100.16579316505621 uWh, by node(s) 21 
+
+Biggest amount of used energy 118.98675241061719 uWh, by node(s) 7 
+
+========================================================================= 
+
+Packet loss:  
+
+Number of generated messages: 5964
+
+Number of received messages: 5197
+
+Difference: 767.0 
+
+Number of backoff procedures: 0
+
+========================================================================= 
+
+Number of packets that reached destination more than once: 5056
+
+========================================================================= 
+
+Average amount of hops made by a packet: 85.64643755238893 ďż˝ 0.5609258321245144 
+
+========================================================================= 
+
+Average packet delay in simulation: 0.035404738940634665 ďż˝ 9.112892852409287E-4 
+
+========================================================================= 
+
+Number of collisions during simulation: 58486
+
+========================================================================= 
+

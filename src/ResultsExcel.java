@@ -26,7 +26,8 @@ public class ResultsExcel {
 	
     public static void initExcelResults() {
         try {
-            String filename = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\test.xls";
+        	long currDate = System.currentTimeMillis();
+            String filename = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM2\\results\\test"+currDate+".xls";
             HSSFWorkbook workbook = new HSSFWorkbook();
             HSSFSheet sheet = workbook.createSheet("FirstSheet");
 
@@ -71,21 +72,21 @@ public class ResultsExcel {
     		
             HSSFRow row0 = sheet.createRow((short)0);
             row0.createCell(0).setCellValue("Total energy used in simulation");
-            row0.createCell(1).setCellValue(totalEnergy*1000);
+            row0.createCell(1).setCellValue(Helper.round(totalEnergy*1000,2));
     		
     		calculateConfidenceInterval(Energy);
     		
             HSSFRow row1 = sheet.createRow((short)1);
             row1.createCell(0).setCellValue("Average amount of energy used in simulation");
-            row1.createCell(1).setCellValue(mean*1000 +" ï¿½ " + confidenceInterval*1000);
+            row1.createCell(1).setCellValue(Helper.round(mean*1000,2) +" ± " + Helper.round(confidenceInterval*1000,2));
             
             HSSFRow row2 = sheet.createRow((short)2);
             row2.createCell(0).setCellValue("Smallest amount of used energy");
-            row2.createCell(1).setCellValue(minEnergy*1000);
+            row2.createCell(1).setCellValue(Helper.round(minEnergy*1000,2));
             
             HSSFRow row3 = sheet.createRow((short)3);
             row3.createCell(0).setCellValue("Biggest amount of used energy ");
-            row3.createCell(1).setCellValue( maxEnergy*1000);
+            row3.createCell(1).setCellValue( Helper.round(maxEnergy*1000,2));
             
             HSSFRow row4 = sheet.createRow((short)4);
             row4.createCell(0).setCellValue("Number of generated messages: ");
@@ -95,19 +96,18 @@ public class ResultsExcel {
             row5.createCell(0).setCellValue("Number of received messages: ");
             row5.createCell(1).setCellValue(Node.packetReceivedCount);
 
-            double difference = Node.generatedPacketCount-1 -Node.packetReceivedCount; 
+            double difference = Node.generatedPacketCount -Node.packetReceivedCount; 
             HSSFRow row6 = sheet.createRow((short)6);
             row6.createCell(0).setCellValue("Difference: ");
             row6.createCell(1).setCellValue(difference);
+            row6.createCell(2).setCellValue("P of success: ");
+            row6.createCell(3).setCellValue(Helper.round(100-100*difference/Node.generatedPacketCount,2));
             
-            HSSFRow row7 = sheet.createRow((short)7);
-            row7.createCell(0).setCellValue("Number of backoff procedures: ");
-            row7.createCell(1).setCellValue(Node.retransmit);
             FileOutputStream fileOut = new FileOutputStream(filename);
             
-            HSSFRow row8 = sheet.createRow((short)8);
-            row8.createCell(0).setCellValue("Number of packets that reached destination more than once: ");
-            row8.createCell(1).setCellValue(Node.duplicateCounter);
+            HSSFRow row7 = sheet.createRow((short)7);
+            row7.createCell(0).setCellValue("Number of packets that reached destination more than once: ");
+            row7.createCell(1).setCellValue(Node.duplicateCounter);
            
             
     		for (Packet p : Node.packetList) {
@@ -117,9 +117,9 @@ public class ResultsExcel {
             
         	calculateConfidenceInterval(Hops);
         	
-            HSSFRow row9 = sheet.createRow((short)9);
-            row9.createCell(0).setCellValue("Average amount of hops made by a packet: ");
-            row9.createCell(1).setCellValue(mean +" ï¿½ " + confidenceInterval);
+            HSSFRow row8 = sheet.createRow((short)8);
+            row8.createCell(0).setCellValue("Average amount of hops made by a packet: ");
+            row8.createCell(1).setCellValue(Helper.round(mean,2) +" ± " + Helper.round(confidenceInterval,2));
             
     		for (Entry<String, Double> startPacket : Node.timeOfPacketGeneration.entrySet()) {
     			String tmppacketID = startPacket.getKey();
@@ -134,13 +134,13 @@ public class ResultsExcel {
     		
         	calculateConfidenceInterval(Delay);
         	
-            HSSFRow row10 = sheet.createRow((short)10);
-            row10.createCell(0).setCellValue("Average packet delay in simulation: ");
-            row10.createCell(1).setCellValue(mean +" ï¿½ " + confidenceInterval);
+            HSSFRow row9 = sheet.createRow((short)9);
+            row9.createCell(0).setCellValue("Average packet delay in simulation: ");
+            row9.createCell(1).setCellValue(Helper.round(1000*mean,2) +" ± " + Helper.round(1000*confidenceInterval,2));
             
-            HSSFRow row11 = sheet.createRow((short)11);
-            row11.createCell(0).setCellValue("Number of collisions during simulation: ");
-            row11.createCell(1).setCellValue(Node.collisionCounter);  
+            HSSFRow row10 = sheet.createRow((short)10);
+            row10.createCell(0).setCellValue("Number of collisions during simulation: ");
+            row10.createCell(1).setCellValue(Node.collisionCounter);  
     		
             workbook.write(fileOut);
             fileOut.close();

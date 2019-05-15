@@ -1,6 +1,6 @@
 /************************************************************************
 Description : Provisioner class for managing algorithms
-Created by : Dominika Zawiślak
+Created by : Dominika Zawislak
 ************************************************************************/
 
 import java.util.ArrayList;
@@ -18,10 +18,12 @@ public class Provisioner {
 
 		if (Engine.algorithm.equals("Minimum Relay Tree"))
 			mRTList();
-		else if (Engine.algorithm.equals("Prim")) {
-			Prim.initPrim();
+		else if (Engine.algorithm.equals("Extended Minimum Relay Tree"))
+			extendedMRTList();
+		else if (Engine.algorithm.equals("Prim"))
 			primList();
-		}
+		else if (Engine.algorithm.equals("Weighted Prim"))
+			weightedPrimList();
 		else if (Engine.algorithm.equals("None"))
 			noAlgorithmList();
 		else
@@ -38,8 +40,28 @@ public class Provisioner {
 		}
 	}
 	
+	public static void extendedMRTList() {
+		Map<Integer, Integer> exmrtList = ExtendedMRT.initExtendedmRT();
+		
+		for (Map.Entry<Integer, Integer> entry : exmrtList.entrySet()) {
+		    byte bytemRTID = entry.getKey().byteValue();
+			listOfRelays.add(bytemRTID);
+		}
+	}
+	
 	public static void primList() {	
+		Prim.initPrim();
+		
 		for (Map.Entry<Integer, Integer> entry : Prim.relayList.entrySet()) {
+		    byte bytePrimID = entry.getKey().byteValue();
+			listOfRelays.add(bytePrimID);
+		}
+	}
+	
+	public static void weightedPrimList() {	
+		WeightedPrim.initWeightedPrim();
+		
+		for (Map.Entry<Integer, Integer> entry : WeightedPrim.wpRelayList.entrySet()) {
 		    byte bytePrimID = entry.getKey().byteValue();
 			listOfRelays.add(bytePrimID);
 		}

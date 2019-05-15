@@ -1,0 +1,44 @@
+Simulation with 30 nodes in U topology. 
+
+Algorithm used: None
+
+========================================================================= 
+
+Total energy used in simulation: 334.8550771229384uWh 
+
+Average amount of energy used in simulation: 11.161835904097947 ďż˝ 0.09663153076640149 uWh 
+
+Smallest amount of used energy 10.00894547905773 uWh, by node(s) 1 
+
+Biggest amount of used energy 11.406376058772594 uWh, by node(s) 19 
+
+========================================================================= 
+
+Packet loss:  
+
+Number of generated messages: 198
+
+Number of received messages: 126
+
+Difference: 72.0 
+
+Number of backoff procedures: 51
+
+========================================================================= 
+
+Number of packets that reached destination more than once: 131
+
+========================================================================= 
+
+Average amount of hops made by a packet: 18.045226130653266 ďż˝ 1.4554347908011227 
+
+========================================================================= 
+
+Average packet delay in simulation: 0.23103493735903785 ďż˝ 0.025144539226855153 
+
+========================================================================= 
+
+Number of collisions during simulation: 996
+
+========================================================================= 
+

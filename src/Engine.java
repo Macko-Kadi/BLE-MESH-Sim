@@ -4,34 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-/**
- * <pre>
-<<<<<<< HEAD
- *  Main class of the simulator. Everything starts and ends here.
- * You create an environment here 
-=======
- * Main class of the simulator. Everything starts and ends here.
- * You create an environment here
->>>>>>> branch 'master' of https://github.com/Macko-Kadi/BLE-MESH-Sim.git
- * </pre>
- * 
- * @author macso
- *
- */
-
-
 class Engine {
 	public static double simTime = 0; // current simulation time - in seconds
-	public static final String algorithm = "None";
-//	public static final String algorithm = "Minimum Relay Tree";
+//	public static final String algorithm = "None";
 //	public static final String algorithm = "Prim";
-	// public static final int NR_OF_NODES=10;
+	public static final String algorithm = "Minimum Relay Tree";
+//	public static final String algorithm = "Extended Minimum Relay Tree";
+//	public static final String algorithm = "Weighted Prim";
 	public static final ArrayList<Node> LIST_OF_NODES = new ArrayList<Node>();
 	public static final double BATTERY_CHECK_INTERVAL = 300; // how often to update battery statuses (and therefore ->
 																// nodes transmission powers)
 	static EventList eventList = new EventList();
 	// static final float MAX_SIM_TIME=3600*24*10; //10 days in the simulated world
-	static final float MAX_SIM_TIME = 3600f; // 6 minuts in the simulated world
+	static final float MAX_SIM_TIME = 60*20; // 6 minuts in the simulated world
 
 	// =============================================MAINFUNCTION=========================================================
 	public static void main(String[] args) {
@@ -40,7 +25,7 @@ class Engine {
 														// simulation)
 
 	// ==========================================JUST AN EXEMPLARY ENVIRONMENT====================================================
-	
+		float lambda = 5/60f;
 		for (Entry<Byte, Map<Float,Float >> entry1 : Topology.nodesMap.entrySet()) {
 			Map<Float, Float> tmp = new HashMap<Float, Float>();
 			Map<Float, Float> temp1 = new HashMap<Float, Float>();
@@ -54,49 +39,14 @@ class Engine {
 				float y_i = entry2.getValue();
 
 				float[] position_i = { x_i, y_i }; // all nodes are in line with 20m in between
-				float[] sourcePar = { 10f / 60f }; // each node has Poisson source (type 0) with lambda=1/60 (once per
-//				float[] sourcePar = { 1f / 6f };		// minute)
+				float[] sourcePar = {lambda }; // each node has Poisson source (type 0) with lambda=1/60 (once per minute)
 				
-<<<<<<< HEAD
-//==========================================JUST AN EXEMPLARY ENVIRONMENT====================================================
-		 
-		for(byte i=0; i<NR_OF_NODES; i++){
-			float[] position_i={20*i,0.0f};	//all nodes are in line with 20m in between
-			float[] sourcePar={1f/60f}; 	//each node has Poisson source (type 0) with lambda=1/60 (once per minute)
-			int cacheSize=100;
-			//Initialize nodes: ID=i, position_i, batteryType=3 (tiny test battery), packetsSource=0, lambda=1/60, casheSize=100
-			LIST_OF_NODES.add(new Node(i, position_i,(byte)(3),(byte)(0),sourcePar,cacheSize));	
-			/*
-			 * Next packet generation is a consequnence of the first, so if you want a node to generate packets -> you must trigger the first event manually. 
-			 * All packets triggered in the example:
-			 */
-			eventList.addEventsFromList(LIST_OF_NODES.get(i).generatePacket());
-			eventList.printEvents();
-		}	
-		final Medium medium = new Medium();	// we use only static methods, so ignore the warning. However, we need to instantiate the object in order to have proper path loss matrix and so on.
-	for(byte i=0; i<NR_OF_NODES; i++){
-		for(byte j=0; j<NR_OF_NODES;j++){
-			float powerRcv=Node.MAX_TRANSMISSION_POWER-Node.MAX_TRANSMISSION_POWER*medium.Pld0_Pt-medium.getPowerDecreaseBetweenNodes(i,j);
-			float SNR=powerRcv-Medium.BACKGROUND_NOISE;
-			System.out.println("SNR in relation (" + i +","+ j+") :" +SNR);
-		}
-	}
-		
-		
-		//same as with packet generation - first BATTERY_CHECK event must be triggered manually
-=======
-				int cacheSize = 100;
+				int cacheSize = 1000;
 				// Initialize nodes: ID=i, position_i, batteryType=3 (tiny test battery),
 				// packetsSource=0, lambda=1/60, casheSize=100
 				LIST_OF_NODES.add(new Node(entry1.getKey(), position_i, (byte) (3), (byte) (0), sourcePar, cacheSize));
-				/*
-				 * Next packet generation is a consequnence of the first, so if you want a node
-				 * to generate packets -> you must trigger the first event manually. All packets
-				 * generated (t=0) in the example:
-				 */
-				if(entry1.getKey()!=1){
-					eventList.addEvent(LIST_OF_NODES.get(entry1.getKey()).generatePacket());
-				}				
+				
+
 			}
 		}		
 
@@ -107,29 +57,35 @@ class Engine {
 		Provisioner.chooseAlgorithm();
 		
 		// first BATTERY_CHECK event must be triggered manually
->>>>>>> branch 'master' of https://github.com/Macko-Kadi/BLE-MESH-Sim.git
 		eventList.addEventsFromList(checkGlobalBatteryLevels());
+		
 		// first START_ADVERTISING_EVENT / TRY_TO_SWITCH_CHANNEL event must be triggered manually
 		for(Node n : LIST_OF_NODES){
 			//if all nodes would start at t=0 system would become synchronized (like slotted aloha)!
 			//the performance would be better, we dont have it in real.
-			simTime+=Helper.generator.nextFloat()/100; //move simTime forward (0-10ms s)
+			simTime+=Helper.generator.nextFloat()/100; //move simTime forward (0-5ms)	
 			eventList.addEvent(n.scheduleAdvertisingEvent());
 			eventList.addEvent(n.scheduleTryToSwitchChannelEvent());
+		
+		} //after all nodes start
+		
+		 //each packet generation is a consequnence of the first, so if you want a node
+		 //to generate packets -> you must trigger the first event manually.
+		for(Node n : LIST_OF_NODES){
+			if (n.ID!=35) {
+					eventList.addEvent(n.schedulePacketGeneration());
+				}
 		}
+
 		
 		// there is no logic behind energy_saving_mode so, for the example purposes ->
 		// all nodes go sleep at 0.017088s (for 305s - the value is defined in the
 		// Node.goSleep() function).
-		// Why 305 ? because simulation time is set to 320 (why ? why not!) so for
-		// almost all time the node 3,4,5 sleep
-//		eventList.addEvent(new Event(0.017088f, "GO_SLEEP", Byte.toString((byte) 3)));
-//		eventList.addEvent(new Event(0.017088f, "GO_SLEEP", Byte.toString((byte) 4)));
 //		eventList.addEvent(new Event(0.017088f, "GO_SLEEP", Byte.toString((byte) 5)));
 		if (Helper.DEBUG_EVENTS) eventList.printEvents();
-
+		eventList.printEvents();
 	// ==========================================EDN OF: JUST AN EXEMPLARY ENVIRONMENT============================================
-
+		simTime=0;
 		/**
 		 * after each event will increase +1 (will goes 0, when equal to
 		 * iterationTreshold
@@ -138,7 +94,7 @@ class Engine {
 		/**
 		 * number of iterations after that the current progress of simulation is shown
 		 */
-		int iterationTreshold = (int) MAX_SIM_TIME / 36;
+		int iterationTreshold = 100000;
 		/*
 		 * The while block evaluates events one by one simTime must not exceed range, 
 		 * and there must be an event to evaluate. Why ==1, not 0? Because there is always
@@ -147,8 +103,14 @@ class Engine {
 		 * UPDATE: now, there is always a set of START_ADVERTISING_EVENT events scheduled, 
 		 * so the second condittion is almost always true
 		 */
-		while (simTime < MAX_SIM_TIME && !(eventList.theList.size() == 1)) {																			
-			simTime = eventList.getFirstEventStartTime();			
+		boolean pgenRemoved=false;
+		while (simTime < MAX_SIM_TIME && !(eventList.theList.size() == 1)) {	
+			if (simTime > MAX_SIM_TIME*0.95 && !pgenRemoved) {
+				eventList.removeAllPacketGenerations();
+				pgenRemoved=true;
+				eventList.printEvents();
+			}
+			simTime = eventList.getFirstEventStartTime();		
 			/*Print the debug only when the evaluated event is different than START_ADVERTISING_EVENT 
 			*(each node generates this type of event periodically with +-10ms interval - that's a lot!
 			* If you realy want to print the event list for all events set
@@ -156,10 +118,14 @@ class Engine {
 			* 
 			* Same for TRY_TO_SWITCH_CHANNEL
 			*/
-			if (simTime>2095)	Helper.DEBUG_ADVERTISING_EVENT=true;
+			//if (simTime>2095)	Helper.DEBUG_ADVERTISING_EVENT=true;
 			String eventType=eventList.theList.get(0).type;
 			if (Helper.DEBUG_EVENTS && (eventType!="START_ADVERTISING_EVENT" || Helper.DEBUG_ADVERTISING_EVENT) && (eventType!="TRY_TO_SWITCH_CHANNEL" || Helper.DEBUG_SWITCH_CHANNEL))
 				eventList.printEvents();
+		//	if(eventType=="PACKET_GENERATION") {
+		//		System.out.println(simTime);
+		//		System.out.println(eventType);
+		//	}
 			eventList.addEventsFromList(eventList.evaluateFirstEvent());
 			if (iterations == iterationTreshold) {
 				System.out.println(Helper.round(100 * simTime / MAX_SIM_TIME, 1) + "%"); // Progress of the simulation -
@@ -168,6 +134,7 @@ class Engine {
 																							// last
 				iterations = 0;
 			}
+			iterations++;
 		}
 		// some results are printed
 		System.out.println("============================================");
@@ -186,28 +153,16 @@ class Engine {
 		//print results
 		ResultsExcel.initExcelResults();
 		Results.simulationResults();
-//		ResultsFrame.initResultsFrame();
 		resultsTable.simulationResultsTable();
 
-
-	//	TopologyFrame.runTopologyFrame();
-	//	Prim.initPrim();
-	//	mRT.initmRT();
+		int relayCounter = 0;
 		for (Node n : LIST_OF_NODES) {
-		if (Provisioner.isNodeRelay(n)) {
-		System.out.println("relay: " + n.ID);	}	
+			if (Provisioner.isNodeRelay(n)) {
+				System.out.println("relay: " + n.ID);
+				relayCounter ++;
+			}	
 		}
-
-//		for (Map.Entry<Integer, Integer> entry : Prim.relayList.entrySet()) {
-//			System.out.println("Before byte: "+ entry.getKey());
-//		    byte bytePrimID = entry.getKey().byteValue();
-//		    System.out.println("list relays: "+ bytePrimID);
-//		}
-		
-//		for (Map.Entry<Integer, Integer> entry2 : mRT.mrtList.entrySet()) {
-//		    byte bytemRTID = entry2.getKey().byteValue();
-//		    System.out.println("list relays: "+ bytemRTID);
-//		}
+		System.out.println("relays: " + relayCounter);
 		
 	}
 
