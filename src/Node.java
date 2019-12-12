@@ -73,7 +73,7 @@ class Node {
 	 * TODO: Is the value realistic ? I used these http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
 	 * </pre>
 	 */
-	private static final float MIN_SNR_SYNC_P0=50; 
+	private static final float MIN_SNR_SYNC_P0=Helper.SIMPLE_SNR_TRESHOLD+80; 
 	/**
 	 * <pre>
 	 * ATTENTION: It is important to distinguish synchronization and data reception phases. 
@@ -88,16 +88,16 @@ class Node {
 	 * TODO: Is the value realistic ? I used these http://www.wireless-nets.com/resources/tutorials/define_SNR_values.html
 	 *  </pre>
 	 */
-	private static final float MIN_SNR_SYNC_P1=40; 
+	//private static final float MIN_SNR_SYNC_P1=40; 
 	/**
 	 * Minimum SNR level required for non-zero probability of successful transmission reception.
 	 * It allows to assign failure to a reception at its beginning (so there is no need to calculate how noise level changes during the reception and so on)
 	 * 
 	 * If the value should be different for different nodes, remove 'static'.
 	 * 
-	 * TODO: Is the value realistic ?  
+	 * TODO: Is the value realistic ? 
 	 */
-	private static final float MIN_SNR_RCVD_P0=50; 
+	private static final float MIN_SNR_RCVD_P0=Helper.SIMPLE_SNR_TRESHOLD+80; 
 	/**
 	 * Minimum SNR level required for certainty (P=1) of successful transmission reception.
 	 * If SNR is greater than the value, transmission is always successfully received.
@@ -106,7 +106,7 @@ class Node {
 	 * 
 	 * TODO: Is the value realistic ?  
 	 */
-	private static final float MIN_SNR_RCVD_P1=40; 
+	//private static final float MIN_SNR_RCVD_P1=40; 
 	 /**
 	 * <pre>
 	 * I've assumed that during transmission a node consumes maxTransmissionPower, no matter of currentTransmissionPower.
@@ -486,10 +486,18 @@ class Node {
 	 */
 	Event startReceiving(Transmission t){
 		if(listeningChannel==t.channel){   //if transmission is visible to a node (listenning channel corresponds to transmission channel)
-			if (nodeState.equals("SYNC")){				//if the node is currently synced to another transmission 
+			if (nodeState.equals("SYNC")){				//if the node is currently synced to another transmission
+				Reception fakeReception = new Reception(t);
+				if (fakeReception.doNodesSeeEachOther())
+					collisionCounter++;
 				if(Helper.DEBUG_RCV) System.out.println("Track noise lvl for reception of packet: "+syncedReception.transmission.packet.header.packetID);
 				syncedReception.trackNoiseLvl(0f);		//update noise lvl of the synced receiving transmission
-			}		
+			}	
+//			else if (nodeState.equals("TRANSMITTING") || nodeState.equals("TX_PREP")){	
+//				Reception fakeReception = new Reception(t);
+//				if (fakeReception.doNodesSeeEachOther())
+//					collisionCounter++;
+//			}
 			else if (nodeState.equals("IDLE")){		 	//if the node is currently idle	
 				if(Helper.DEBUG_RCV) System.out.println("Node "+ID +" is able to sync, nodeState" + nodeState);	
 				Reception reception=new Reception(t);	//Encapsulate the transmission in the Reception object	
@@ -1013,6 +1021,13 @@ class Node {
 			 return receptionPower-getMaxNoise();
 		}
 		/**
+		 * The function returns zero noise SNR level. Helps to resolve whether a transmission might be sychronized.
+		 * @return The highest noise lvl occured during receiving period
+		 */
+		private double getZeroNoiseSNR(){
+			 return receptionPower-Medium.BACKGROUND_NOISE;
+		}
+		/**
 		 * The function is helpful for naive approach of SNR calculation. It provides the worst case scenario - maximum noise level that occures during reception
 		 * @return The highest noise lvl occured during receiving period
 		 */
@@ -1033,6 +1048,7 @@ class Node {
 		  * 
 		  * @return success or fail of the reception
 		  */
+		private boolean doNodesSeeEachOther() {return getZeroNoiseSNR() > MIN_SNR_SYNC_P0;}
 		private boolean isTheReceptionSuccessfull(){return (getProbabilityOfSuccessfullReception()>Helper.generator.nextFloat()); }		
 		/**
 		  * <pre>

@@ -24,7 +24,7 @@ public class resultsTable {
 	public static void simulationResultsTable() {
 
 		try {
-			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM2\\results\\";
+			String path = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM\\results\\";
 			String fileName = (Engine.algorithm + "_" + Topology.topologyType + "_" + Topology.NR_OF_NODES + ".txt");
 			writer = new PrintWriter(path + fileName, "UTF-8");
 		} catch (FileNotFoundException e) {

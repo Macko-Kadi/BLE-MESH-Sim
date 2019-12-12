@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Provisioner {
 	
-	static ArrayList<Byte> listOfRelays = new ArrayList<Byte>();
+	public static ArrayList<Byte> listOfRelays = new ArrayList<Byte>();
 
 	public static boolean isNodeRelay(Node n) {
 		return (listOfRelays.contains(n.ID));
@@ -16,7 +16,7 @@ public class Provisioner {
 
 	public static void chooseAlgorithm() {
 
-		if (Engine.algorithm.equals("Minimum Relay Tree"))
+		if (Engine.algorithm.equals("MRT"))
 			mRTList();
 		else if (Engine.algorithm.equals("Extended Minimum Relay Tree"))
 			extendedMRTList();
@@ -24,6 +24,8 @@ public class Provisioner {
 			primList();
 		else if (Engine.algorithm.equals("Weighted Prim"))
 			weightedPrimList();
+		else if (Engine.algorithm.equals("OPT"))
+			fileSelected();
 		else if (Engine.algorithm.equals("None"))
 			noAlgorithmList();
 		else
@@ -38,6 +40,10 @@ public class Provisioner {
 		    byte bytemRTID = entry.getKey().byteValue();
 			listOfRelays.add(bytemRTID);
 		}
+	}
+	
+	public static void fileSelected() {
+		listOfRelays=FileSelected.readFile(Engine.relayPath);	
 	}
 	
 	public static void extendedMRTList() {

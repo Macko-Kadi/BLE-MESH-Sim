@@ -33,7 +33,7 @@ public final class Helper {
 	 * 
 	 */
 	public static boolean SIMPLE_SNR=true; 
-	public static float SIMPLE_SNR_TRESHOLD=-30f;
+	public static float SIMPLE_SNR_TRESHOLD=Engine.rangeDb;
 
 	public static int ROUND_DEC=3; 		// you may use this parameter whenever you will round a value
 	public static Random generator=new Random(2347321); //just a common random number generator

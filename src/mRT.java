@@ -71,7 +71,7 @@ public class mRT {
 				end = (int) endVertex;
 			//	System.out.println("NodeIDs: " + start + "-" + end + " powerRecv: " + Medium.getPowerDecreaseBetweenNodes(startVertex, endVertex));
 			//	System.out.println("NodeIDs: " + start + "-" + end + " SNR: " + SNR);
-				if (SNR > 50.00 && SNR!=inf) {
+				if (SNR > Engine.rangeDb+80 && SNR!=inf) {
 					w = w + 1;
 					EndV.add(end);
 				}

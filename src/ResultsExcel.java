@@ -27,7 +27,7 @@ public class ResultsExcel {
     public static void initExcelResults() {
         try {
         	long currDate = System.currentTimeMillis();
-            String filename = "D:\\GoogleDrive\\_PRACA\\eclipse-workspace\\BLE_MESH_SIM2\\results\\test"+currDate+".xls";
+            String filename = Engine.excelPath;
             HSSFWorkbook workbook = new HSSFWorkbook();
             HSSFSheet sheet = workbook.createSheet("FirstSheet");
 
@@ -78,8 +78,9 @@ public class ResultsExcel {
     		
             HSSFRow row1 = sheet.createRow((short)1);
             row1.createCell(0).setCellValue("Average amount of energy used in simulation");
-            row1.createCell(1).setCellValue(Helper.round(mean*1000,2) +" ± " + Helper.round(confidenceInterval*1000,2));
-            
+     //       row1.createCell(1).setCellValue(Helper.round(mean*1000,2) +" ± " + Helper.round(confidenceInterval*1000,2));
+            row1.createCell(1).setCellValue(Helper.round(mean*1000,2));
+                   
             HSSFRow row2 = sheet.createRow((short)2);
             row2.createCell(0).setCellValue("Smallest amount of used energy");
             row2.createCell(1).setCellValue(Helper.round(minEnergy*1000,2));
@@ -98,10 +99,8 @@ public class ResultsExcel {
 
             double difference = Node.generatedPacketCount -Node.packetReceivedCount; 
             HSSFRow row6 = sheet.createRow((short)6);
-            row6.createCell(0).setCellValue("Difference: ");
-            row6.createCell(1).setCellValue(difference);
-            row6.createCell(2).setCellValue("P of success: ");
-            row6.createCell(3).setCellValue(Helper.round(100-100*difference/Node.generatedPacketCount,2));
+            row6.createCell(0).setCellValue("P of success: ");
+            row6.createCell(1).setCellValue(Helper.round(100-100*difference/Node.generatedPacketCount,2));
             
             FileOutputStream fileOut = new FileOutputStream(filename);
             
@@ -119,7 +118,8 @@ public class ResultsExcel {
         	
             HSSFRow row8 = sheet.createRow((short)8);
             row8.createCell(0).setCellValue("Average amount of hops made by a packet: ");
-            row8.createCell(1).setCellValue(Helper.round(mean,2) +" ± " + Helper.round(confidenceInterval,2));
+       //     row8.createCell(1).setCellValue(Helper.round(mean,2) +" ± " + Helper.round(confidenceInterval,2));
+            row8.createCell(1).setCellValue(Helper.round(mean,2));
             
     		for (Entry<String, Double> startPacket : Node.timeOfPacketGeneration.entrySet()) {
     			String tmppacketID = startPacket.getKey();
@@ -136,12 +136,32 @@ public class ResultsExcel {
         	
             HSSFRow row9 = sheet.createRow((short)9);
             row9.createCell(0).setCellValue("Average packet delay in simulation: ");
-            row9.createCell(1).setCellValue(Helper.round(1000*mean,2) +" ± " + Helper.round(1000*confidenceInterval,2));
+        //    row9.createCell(1).setCellValue(Helper.round(1000*mean,2) +" ± " + Helper.round(1000*confidenceInterval,2));
+            row9.createCell(1).setCellValue(Helper.round(1000*mean,2));
             
             HSSFRow row10 = sheet.createRow((short)10);
-            row10.createCell(0).setCellValue("Number of collisions during simulation: ");
-            row10.createCell(1).setCellValue(Node.collisionCounter);  
-    		
+            row10.createCell(0).setCellValue("% of collisions during simulation: ");
+            row10.createCell(1).setCellValue(100*(float)(Node.collisionCounter)/(Node.collisionCounter+Node.noCollisionCounter));  
+            
+            HSSFRow row11 = sheet.createRow((short)11);
+            row11.createCell(0).setCellValue("Relays: ");
+            row11.createCell(1).setCellValue(Provisioner.listOfRelays.toString());  
+            HSSFRow row12 = sheet.createRow((short)12);
+            row12.createCell(0).setCellValue("Relays number: ");
+            row12.createCell(1).setCellValue(Provisioner.listOfRelays.size());  
+            
+            HSSFRow row13 = sheet.createRow((short)13);
+            row13.createCell(0).setCellValue("Number of wrong receptions during simulation: ");
+            row13.createCell(1).setCellValue(Node.collisionCounter); 
+            
+            HSSFRow row14 = sheet.createRow((short)14);
+            row14.createCell(0).setCellValue("Number of success receptions during simulation: ");
+            row14.createCell(1).setCellValue(Node.noCollisionCounter); 
+            
+            HSSFRow row15 = sheet.createRow((short)15);
+            row15.createCell(0).setCellValue("Number of transmissions (packets send) during simulation: ");
+            row15.createCell(1).setCellValue(Node.sentPacketCount); 
+
             workbook.write(fileOut);
             fileOut.close();
 //            workbook.close();

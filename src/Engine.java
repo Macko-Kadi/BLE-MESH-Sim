@@ -8,24 +8,55 @@ class Engine {
 	public static double simTime = 0; // current simulation time - in seconds
 //	public static final String algorithm = "None";
 //	public static final String algorithm = "Prim";
-	public static final String algorithm = "Minimum Relay Tree";
+	public static  String algorithm = "MRT";
 //	public static final String algorithm = "Extended Minimum Relay Tree";
 //	public static final String algorithm = "Weighted Prim";
-	public static final ArrayList<Node> LIST_OF_NODES = new ArrayList<Node>();
-	public static final double BATTERY_CHECK_INTERVAL = 300; // how often to update battery statuses (and therefore ->
+//	public static final String algorithm = "OPT";
+	public static  int probeNr=1;
+	public static  int range=40;
+	public static  int nrOfNodes=50;
+	public static int lambda_=20;
+	public static  String relayPath;
+	public static String topo;
+	public static  float rangeDb;
+	public static String resPath;
+	public static String excelPath;
+	public static String topologyFilename;
+	public static String topologyFilePath;
+	public static  ArrayList<Node> LIST_OF_NODES = new ArrayList<Node>();
+	public static  double BATTERY_CHECK_INTERVAL = 300; // how often to update battery statuses (and therefore ->
 																// nodes transmission powers)
 	static EventList eventList = new EventList();
 	// static final float MAX_SIM_TIME=3600*24*10; //10 days in the simulated world
-	static final float MAX_SIM_TIME = 60*20; // 6 minuts in the simulated world
+	static final float MAX_SIM_TIME = 60*60*1.05f; // 1 hour in the simulated world
 
 	// =============================================MAINFUNCTION=========================================================
 	public static void main(String[] args) {
+		sim(args);	
+	}
+	public static void sim(String[] args_) {
+		nrOfNodes=Integer.parseInt(args_[0]);
+		probeNr=Integer.parseInt(args_[1]);
+		range=Integer.parseInt(args_[2]);
+		algorithm=args_[3];
+		topo=args_[4];
+		lambda_=Integer.parseInt(args_[5]);
+		rangeDb =10-(float)(30*Math.log10(range));
+		resPath=topo+"_"+nrOfNodes+"_"+algorithm+"_"+range+"_"+probeNr+".xls";
+		relayPath = topo+"Building_N"+nrOfNodes+"_Nodes"+probeNr+"_D"+range+".000000_optres.txt";
+		excelPath="D:\\pulpit\\ble-nowe\\wyniki-"+lambda_+"\\"+topo+"_"+nrOfNodes+"\\"+resPath;
+	//	excelPath="D:\\pulpit\\mrt-mesh\\Maciek\\wyniki-L2\\"+topo+"_"+nrOfNodes+"\\demand\\"+resPath;
+	//	topologyFilePath="D:\\pulpit\\mrt-mesh\\Maciek\\s-demand\\";
+		topologyFilePath="D:\\pulpit\\ble-nowe\\bak\\";
+		topologyFilename=(Engine.topo+"Building_N"+Engine.nrOfNodes+"_Nodes"+Engine.probeNr+".txt");
+		System.out.println("start!");
 		Topology.readFile();
+	//	System.out.println("rangeDb: "+rangeDb);
 		long simStartTime = System.currentTimeMillis(); // needed for simulaton time calculation (printed at the end of
 														// simulation)
 
 	// ==========================================JUST AN EXEMPLARY ENVIRONMENT====================================================
-		float lambda = 5/60f;
+		float lambda = (float)(lambda_)/60f;
 		for (Entry<Byte, Map<Float,Float >> entry1 : Topology.nodesMap.entrySet()) {
 			Map<Float, Float> tmp = new HashMap<Float, Float>();
 			Map<Float, Float> temp1 = new HashMap<Float, Float>();
@@ -39,12 +70,12 @@ class Engine {
 				float y_i = entry2.getValue();
 
 				float[] position_i = { x_i, y_i }; // all nodes are in line with 20m in between
-				float[] sourcePar = {lambda }; // each node has Poisson source (type 0) with lambda=1/60 (once per minute)
+				float[] sourcePar = {lambda}; // each node has Poisson source (type 0) with lambda=1/60 (once per minute)
 				
 				int cacheSize = 1000;
-				// Initialize nodes: ID=i, position_i, batteryType=3 (tiny test battery),
+				// Initialize nodes: ID=i, position_i, batteryType=0
 				// packetsSource=0, lambda=1/60, casheSize=100
-				LIST_OF_NODES.add(new Node(entry1.getKey(), position_i, (byte) (3), (byte) (0), sourcePar, cacheSize));
+				LIST_OF_NODES.add(new Node(entry1.getKey(), position_i, (byte) (0), (byte) (0), sourcePar, cacheSize));
 				
 
 			}
@@ -163,7 +194,6 @@ class Engine {
 			}	
 		}
 		System.out.println("relays: " + relayCounter);
-		
 	}
 
 	// ==================================================================================================//

@@ -175,8 +175,42 @@ class Medium {
 	 * n=3 - From the document: Yet Another Network Simulator (auth. Lacage, Henderson), chapter 8.1
 	 * </pre>
 	 */
-	private static float getDistancePowerDecrease(Position pos1, Position pos2){
-		return (float)(30*Math.log10(Position.getDistance(pos1, pos2)));
+	public static float getDistancePowerDecrease(Position pos1, Position pos2){
+		float decrease = (float)(30*Math.log10(Position.getDistance(pos1, pos2)));
+		// When U topology is considered, avoid visibility through the walls
+		if (Engine.topo=="U" && isWallInBetween(pos1, pos2)) {
+			decrease += 80;
+		}
+		return decrease;
+	}
+	
+	
+	public static boolean isWallInBetween(Position pos1, Position pos2) {
+		float x1=pos1.getX();
+		float x2=pos2.getX();
+		float y1=pos1.getY();
+		float y2=pos2.getY();
+		if(x1>x2) { //reverse order if needed
+			float xt=x2;
+			float yt=y2;
+			x2=x1;
+			y2=y1;
+			x1=xt;
+			y1=yt;
+		}
+		//both in left or right or top room
+		if (x2 < 30 || x1 > 70 || (y1 > 70 && y2 > 70))
+			return false;
+		//opposite sites
+		if(x1<30 && x2>70 && y1<70 && y2<70)
+			return true;
+	
+		//does line touch walls?
+		float a=(y1-y2)/(x1-x2);
+		float b=y1-a*x1;
+		float y30=a*30+b;
+		float y70=a*70+b;
+		return(y30<70 || y70<70);
 	}
 	
 	/**
@@ -198,7 +232,9 @@ class Medium {
 	 * @param j Second node ID
 	 * @return value at 
 	 */
-	static float getPowerDecreaseBetweenNodes(byte i, byte j){return distancePowerDecreaseMatrix[i][j];}
+	static float getPowerDecreaseBetweenNodes(byte i, byte j){
+		return distancePowerDecreaseMatrix[i][j];
+		}
 	/**
 	 * @param nodeID
 	 * @return noise lvl seen by node of nodeID ID
